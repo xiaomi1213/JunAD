@@ -1,39 +1,88 @@
+import numpy as np
 import tensorflow as tf
 
-class Basic_cnn_tf_model(object):
-    def __init__(self,keep_prob, num_classes):
-        self.keep_prob = keep_prob
-        self.num_classes = num_classes
+"""
+x = [[1,2,3,4],[5,6,2,7]]
+#y = [[1,2,3,4],[5,6,2,7]]
+y = [[3,4,5,6],[4,3,2,2]]
+correct_prediction = tf.equal(tf.argmax(x,axis=1),tf.argmax(y,axis=1))
+accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+with tf.Session() as sess:
 
-    def fprop(self, x, y):
-        conv1 = tf.layers.conv2d(inputs=x,  # shape(28, 28, 1)
-                                      filters=16,
-                                      kernel_size=5,
-                                      strides=1,
-                                      padding='same',
-                                      activation=tf.nn.relu)  # -> (28, 28, 16 )
+    acc = sess.run(accuracy)
+    print(acc)
+"""
 
-        pool1 = tf.layers.max_pooling2d(inputs=conv1,
-                                             pool_size=2,
-                                             strides=2)  # -> (14, 14, 16)
+sess = tf.Session()
 
-        conv2 = tf.layers.conv2d(inputs=pool1,
-                                      filters=32,
-                                      kernel_size=5,
-                                      strides=1,
-                                      padding='same',
-                                      activation=tf.nn.relu)  # -> (14, 14, 32)
+class Test(object):
+    def __init__(self):
+        self.x = tf.placeholder(tf.float32, [1])
+        self.y = tf.placeholder(tf.float32, [1])
 
-        pool2 = tf.layers.max_pooling2d(inputs=conv2,
-                                             pool_size=2,
-                                             strides=2
-                                             )  # -> (7, 7, 32)
+    def get(self,x_input):
 
-        flat = tf.reshape(pool2, [-1, 7 * 7 * 32])
-        dense1 = tf.layers.dense(flat, 256)
-        dropout = tf.layers.dropout(dense1, rate=self.keep_prob)
-        logits = tf.layers.dense(dropout, self.num_classes)
-        outputs = tf.nn.softmax(logits)
-        loss = tf.losses.softmax_cross_entropy(y,logits)
+        y = self.x + [1]
+        with sess.as_default():
+            sess.run(tf.global_variables_initializer())
+            preds = sess.run(y,feed_dict={self.x:x_input})
+            return preds
 
-        return logits, outputs, loss
+test = Test()
+inputs = [1]
+predict = test.get(x_input=inputs)
+print(predict)
+
+
+class A(object):
+    def __init__(self):
+        pass
+    def get_A(self,a):
+        b = a+1
+        return b
+
+class B(object):
+    def __init__(self):
+        pass
+    def get_B(self,b):
+        c = b-1
+        return c
+
+class C(A, B):
+    def __init__(self):
+        pass
+
+c = C()
+d = c.get_A(1)
+print('class A: %d' % d)
+
+e = c.get_B(1)
+print('class B: %d' % e)
+
+preds = [False, False, False, True, True, False, False,]
+
+
+ui = [2,3,4,8,6]
+uj = [1,3,6,8,9]
+u = np.equal(ui, uj)
+usum = np.sum(u)
+print(u, usum)
+
+x1 = tf.placeholder([None])
+x2 = tf.placeholder([None])
+
+def a1(a, b):
+    a = tf.constant(a)
+    b = tf.constant(b)
+    c = a+b
+    return c
+
+def a2(d):
+    c = a1(a, b)
+    e = c+d
+
+t = tf.constant([1])
+with tf.Session() as sess1:
+    sess1.run(tf.variables_initializer([tf.Variable(t)]))
+    a = sess.run(t)
+print(a)
