@@ -13,13 +13,13 @@ if __name__ == '__main__':
     from cleverhans.utils_mnist import data_mnist
     from cleverhans import attacks
     import tensorflow as tf
-    from evaluate_test import evaluate
-    from model_test import Cleverhans_model_wrapper
-    from model_test import Basic_cnn_tf_model
+    from evaluate import evaluate
+    from model import Cleverhans_model_wrapper
+    from model import Basic_cnn_tf_model
     from show_image import show_a_image
     import numpy as np
-    from train_tf_model_test import train_tf_model_test
-    from predict_test import predict
+    from train import train_tf_model_test
+    from predict import predict
     x_train, y_train, x_test, y_test = data_mnist(train_start=0,
                                                   train_end=5000,
                                                   test_start=0,

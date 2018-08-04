@@ -34,10 +34,10 @@ def evaluate(sess, logits, x, y, X_test, Y_test):
 
 if __name__ == "__main__":
     from cleverhans.utils_mnist import data_mnist
-    from model_test import Basic_cnn_tf_model
-    from model_test import Cleverhans_model_wrapper
+    from model import Basic_cnn_tf_model
+    from model import Cleverhans_model_wrapper
     import numpy as np
-    from train_tf_model_test import train_tf_model_test
+    from train import train_tf_model_test
     x_train, y_train, x_test, y_test = data_mnist(train_start=0,
                                                   train_end=5000,
                                                   test_start=0,

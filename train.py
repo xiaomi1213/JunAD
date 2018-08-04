@@ -89,8 +89,8 @@ def train_tf_model_test(sess, loss, x, y, X_train, Y_train, batch_size=100, num_
 
 if __name__ == "__main__":
     from cleverhans.utils_mnist import data_mnist
-    from model_test import Basic_cnn_tf_model
-    from model_test import Cleverhans_model_wrapper
+    from model import Basic_cnn_tf_model
+    from model import Cleverhans_model_wrapper
 
     x_train, y_train, x_test, y_test = data_mnist(train_start=0,
                                                   train_end=5000,
