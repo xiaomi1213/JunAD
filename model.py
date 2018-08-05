@@ -4,7 +4,7 @@ import os
 from abc import ABCMeta
 import tensorflow as tf
 import numpy as np
-rs = np.random.RandomState()
+
 
 """
 class Model(object):
