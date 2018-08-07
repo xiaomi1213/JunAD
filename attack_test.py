@@ -32,7 +32,7 @@ if __name__ == '__main__':
     #model = Basic_cnn_tf_model(keep_prob=0.5, num_classes=10)
     #model.train(x_train, y_train)
     loss = model.jun_get_loss(x, y)
-    train_tf_model_test(sess, loss, x, y, x_train, y_train, num_epoch=20)
+    train_tf_model_test(sess, loss, x, y, x_train, y_train, num_epoch=100)
     logits = model.jun_get_logits(x)
     evaluate(sess, logits, x, y, x_test, y_test)
     fgsm_params = {
@@ -42,8 +42,8 @@ if __name__ == '__main__':
     adv_x = fgsm_attacks(model, sess=sess, x=x_test, **fgsm_params)
     show_a_image(np.squeeze(adv_x[0]))
     show_a_image(np.squeeze(x_test[0]))
-    #y_adv = predict(sess, logits, x, adv_x)
-    #print('y_adv: ', y_adv)
+    y_adv = predict(sess, logits, x, adv_x)
+    print('y_adv: ', y_adv[0])
     evaluate(sess, logits, x, y, adv_x, y_test)
 
 
