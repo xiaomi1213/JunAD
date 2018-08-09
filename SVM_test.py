@@ -32,6 +32,7 @@ fgsm_params = {
 adv_x = fgsm_attacks(model, sess=sess, x=x_test, **fgsm_params)
 show_a_image(np.squeeze(adv_x[0]))
 show_a_image(np.squeeze(x_test[0]))
+
 y_adv = predict(sess, logits, x, adv_x)
 print('y_adv: ', y_adv[0])
 evaluate(sess, logits, x, y, adv_x, y_test)
@@ -40,7 +41,7 @@ from sklearn import svm
 svm_x = np.reshape(x_train,[5000,28*28])
 svm_y = np.argmax(y_train,axis=1)
 svm_x_adv = np.reshape(adv_x, [1000,28*28])
-clf = svm.SVC()
+clf = svm.SVC(C=0.05)
 clf.fit(svm_x, svm_y)
 svm_preds =[]
 for i in range(1000):

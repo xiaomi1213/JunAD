@@ -11,7 +11,7 @@ with tf.Session() as sess:
 
     acc = sess.run(accuracy)
     print(acc)
-"""
+
 
 sess = tf.Session()
 
@@ -86,3 +86,12 @@ with tf.Session() as sess1:
     sess1.run(tf.variables_initializer([tf.Variable(t)]))
     a = sess.run(t)
 print(a)
+
+"""
+
+from tqdm import tnrange
+from time import sleep
+
+for i in tnrange(4, desc='1st loop'):
+    for j in tnrange(10, desc='2nd loop'):
+        sleep(0.01)
