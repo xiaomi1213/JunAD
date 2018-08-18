@@ -41,11 +41,13 @@ from sklearn import svm
 svm_x = np.reshape(x_train,[5000,28*28])
 svm_y = np.argmax(y_train,axis=1)
 svm_x_adv = np.reshape(adv_x, [1000,28*28])
-clf = svm.SVC(C=0.05)
+
+#clf = svm.SVC(C=0.05)
+clf = svm.SVC(C=0.05, decision_function_shape='ovr')
 clf.fit(svm_x, svm_y)
 svm_preds =[]
 for i in range(1000):
-    svm_pred = clf.predict([svm_x_adv[i]])
+    svm_pred = clf.predict([svm_x[i]])
     svm_preds.append(svm_pred)
 svm_preds = np.array(svm_preds)
 print(svm_preds[0].shape)
@@ -56,3 +58,17 @@ accu = np.equal(np.squeeze(svm_preds),np.argmax(y_test,1))
 print(accu.shape)
 accuracy = np.mean(accu)
 print(accuracy)
+
+svm_adv_preds =[]
+for i in range(1000):
+    svm_adv_pred = clf.predict([svm_x_adv[i]])
+    svm_adv_preds.append(svm_adv_pred)
+svm_adv_preds = np.array(svm_adv_preds)
+print(svm_adv_preds[0].shape)
+print(svm_adv_preds[0])
+print(svm_adv_preds.shape)
+accu_adv = np.equal(np.squeeze(svm_adv_preds),np.argmax(y_test,1))
+#print(accu)
+print(accu_adv.shape)
+accuracy_adv = np.mean(accu_adv)
+print(accuracy_adv)

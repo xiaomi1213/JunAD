@@ -1,6 +1,13 @@
-import numpy as np
-import tensorflow as tf
 import torch
+import torch.nn as nn
+import torch.utils.data as Data
+import torchvision
+import os
+from show_image import show_a_image
+from svm_loss_test import svm_l1loss, svm_l2loss
+from sklearn import svm
+import numpy as np
+import foolbox
 """
 x = [[1,2,3,4],[5,6,2,7]]
 #y = [[1,2,3,4],[5,6,2,7]]
@@ -98,10 +105,6 @@ for i in tnrange(4, desc='1st loop'):
 
 """
 
-svm_pred_y = [0,0,0,0,1]
-svm_test_y = [0,1,0,0,1]
-svm_accuracy = float(np.mean(svm_pred_y == svm_test_y))
-print(svm_accuracy)
-a = np.array([True,False])
-b = a.astype(int)
-print(b)
+
+a = np.array([1,2,3])
+print(len(a))
