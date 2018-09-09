@@ -103,8 +103,16 @@ for i in tnrange(4, desc='1st loop'):
     for j in tnrange(10, desc='2nd loop'):
         sleep(0.01)
 
+
+
+preds = np.array([[0.1, 0.2, 0.6, 0.05, 0.05],[0.2, 0.5, 0.1, 0.1, 0.1]], np.float32)
+preds = torch.from_numpy(preds)
+y = np.array([[0.0, 0.0, 0.0, 1.0, 0.0],[0.0, 1.0, 0.0, 0.0, 0.0]], np.float32)
+y = torch.from_numpy(y)
+a = torch.zeros([1], dtype=torch.float32)
+b = a+0.1
+print(y * torch.log((y + b)/ (preds+b)))
+c = torch.sum((y * torch.log((y + b)/ (preds+b))), dtype=torch.float32)
+print(c)
 """
 
-
-a = np.array([1,2,3])
-print(len(a))

@@ -3,14 +3,14 @@ import torch
 
 
 def Dkl(preds, y):
-    a = torch.zeros([1], dtype=torch.float32)
-    b = a+0.1
-    #return torch.sum((preds * torch.log(preds/(y+b))), dtype=torch.long)
-    #c = torch.sum((preds * torch.log(preds / (y + b))), dtype=torch.long).float()
-    c = torch.sum((y * torch.log(y / preds)), dtype=torch.float32)
+    a = torch.zeros([1])
+    b = a.long() +0.1
+
+    #c = torch.sum((y * torch.log(y / preds)), dtype=torch.float32)
+    #c = (y * torch.log(y / preds)).sum()
+    c = torch.sum((y * torch.log((y + b) / (preds + b))),dtype=torch.long())
     return c
-    #c = np.sum(preds.data.numpy() * np.log(preds.data.numpy()/(y.data.numpy() + b.data.numpy())))
-    #return torch.from_numpy(c)
+
 
 
 def Margin_Dkl(preds, y, gama):
@@ -36,7 +36,7 @@ y = np.array([[0.0, 0.0, 0.0, 1.0, 0.0],[0.0, 1.0, 0.0, 0.0, 0.0]], np.float32)
 print(torch.argmax(torch.from_numpy(y),1).data.numpy() )
 
 #print(torch.from_numpy(preds), torch.from_numpy(y))
-print(Margin_Dkl(torch.from_numpy(preds), torch.from_numpy(y), gama=1.0))
+#print(Margin_Dkl(torch.from_numpy(preds), torch.from_numpy(y), gama=1.0))
 
 #y = torch.from_numpy(y)
 #gama = torch.zeros(y.size(), dtype=torch.float32)

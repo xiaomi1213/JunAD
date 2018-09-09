@@ -2,14 +2,9 @@ import torch
 import torch.nn as nn
 import torch.utils.data as Data
 import torchvision
-import os
 from show_image import show_a_image
-from svm_loss_test import svm_l1loss, svm_l2loss
-from sklearn import svm
 import numpy as np
 import foolbox
-
-from margin_Dkl_loss import Margin_Dkl
 
 torch.manual_seed(1)
 
@@ -74,12 +69,14 @@ cnn = CNN()
 
 optimizer = torch.optim.Adam(cnn.parameters(), lr=LR)
 #loss_func = Margin_Dkl(gama=GAMA)
+loss_func = nn.MultiMarginLoss()
 
 print('-------------CNN training--------------------')
 for epoch in range(EPOCH):
     for step, (b_x, b_y) in enumerate(train_loader):
         output = cnn(b_x)
-        loss = Margin_Dkl(output, b_y, gama=GAMA)
+        #loss = Margin_Dkl(output, b_y, gama=GAMA)
+        loss = loss_func(output, b_y)
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
@@ -96,3 +93,36 @@ cnn_test_output = cnn(cnn_test_x)
 pred_y = torch.max(cnn_test_output, 1)[1].data.squeeze().numpy()
 cnn_accuracy = float((pred_y == cnn_test_y.data.numpy()).astype(int).sum())/float(cnn_test_y.size(0))
 print('CNN accuracy: %.3f' % cnn_accuracy)
+
+
+# select the correctly classified samples indices
+a = (pred_y == cnn_test_y.data.numpy()).astype(int)
+cnn_indice = []
+for i in range(num_test):
+    if a[i] == 1:
+        cnn_indice.append(i)
+
+# generate adv_x with CNN
+mean = np.array([0.485, 0.456, 0.406]).reshape((3, 1, 1))
+std = np.array([0.229, 0.224, 0.225]).reshape((3, 1, 1))
+cnn_model = foolbox.models.PyTorchModel(cnn.eval(), bounds=(0, 1), num_classes=10, preprocessing=(0, 1))
+cnn_attack = foolbox.attacks.FGSM(cnn_model)
+cnn_adv_test_x = test_x.data.numpy()[cnn_indice]
+cnn_adv_test_y = test_y.data.numpy()[cnn_indice]
+
+cnn_adv_xs = []
+for i in range(len(cnn_indice)):
+    cnn_adv_x = cnn_attack(cnn_adv_test_x[i],cnn_adv_test_y[i])
+    cnn_adv_xs.append(cnn_adv_x)
+
+cnn_adv_xs_arr = np.array(cnn_adv_xs)
+print(cnn_adv_xs_arr.shape)
+#cnn_adv_xs = np.transpose(cnn_adv_xs,(0,2,3,1))
+print(cnn_adv_xs_arr.shape)
+show_a_image(np.squeeze(cnn_adv_xs[8], 0))
+
+# evaluate the cnn model with cnn_adv_x
+test_output = cnn(torch.from_numpy(cnn_adv_xs_arr))
+cnn_pred_adv_y = torch.max(test_output, 1)[1].data.squeeze().numpy()
+cnn_adv_accuracy = float((cnn_pred_adv_y == cnn_adv_test_y).astype(int).sum())/float(cnn_adv_test_y.shape[0])
+print('CNN_adv accuracy: %.3f' % cnn_adv_accuracy)

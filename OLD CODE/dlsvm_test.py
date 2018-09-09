@@ -1,4 +1,3 @@
-import tensorflow as tf
 import numpy as np
 
 def svm_l1loss(a, y, weight, C=1.0):

@@ -78,7 +78,7 @@ pretrained_cnn = torch.load(r'E:\Bluedon\3Code\pytorch_models\cnn.pkl')
 # train the cnn model
 cnn = CNN()
 
-"""
+
 optimizer = torch.optim.Adam(cnn.parameters(), lr=LR)
 loss_func = nn.CrossEntropyLoss()
 
@@ -96,7 +96,7 @@ for epoch in range(EPOCH):
 
 # save the cnn model
 torch.save(cnn,r'E:\Bluedon\3Code\pytorch_models\cnn.pkl')
-"""
+
 # evaluate the cnn model
 cnn_test_x = test_x
 cnn_test_y = test_y
@@ -113,7 +113,7 @@ for i in range(num_test):
         cnn_indice.append(i)
 
 
-"""
+
 # train and evaluate svm
 svm_train_x = np.reshape(train_x.data.numpy(),[num_train,28*28])
 svm_train_y = train_y.data.numpy()
@@ -133,7 +133,7 @@ svm_preds = np.array(svm_preds)
 accu = np.equal(np.squeeze(svm_preds,1),svm_test_y)
 svm_accuracy = np.mean(accu)
 print('SVM accuracy: %.3f' % svm_accuracy)
-"""
+
 
 
 # build and train CNN+SVM
@@ -203,7 +203,7 @@ for i in range(num_test):
         cnn_svm_indice.append(i)
 
 
-"""
+
 # generate adv_x with CNN
 mean = np.array([0.485, 0.456, 0.406]).reshape((3, 1, 1))
 std = np.array([0.229, 0.224, 0.225]).reshape((3, 1, 1))
@@ -246,7 +246,7 @@ svm_adv_accu = np.equal(np.squeeze(svm_adv_preds),np.argmax(svm_test_y,1))
 #print(accu.shape)
 svm_adv_accuracy = np.mean(svm_adv_accu)
 print('SVM with cnn_adv_x accuracy: ',svm_adv_accuracy)
-"""
+
 
 # generate adv_x with CNN+SVM
 mean = np.array([0.485, 0.456, 0.406]).reshape((3, 1, 1))
@@ -276,7 +276,7 @@ pred_svm_adv_y = torch.max(cnn_svm_test_output, 1)[1].data.squeeze().numpy()
 cnn_svm_adv_accuracy = float((pred_svm_adv_y == cnn_svm_adv_test_y).astype(int).sum())/float(cnn_svm_adv_test_y.shape[0])
 print('CNN_SVM_adv with cnn_svm_adv_x accuracy: %.3f' % cnn_svm_adv_accuracy)
 
-"""
+
 # evaluate the cnn_svm model with cnn_adv_x
 test_output = pretrained_cnn_svm(torch.from_numpy(cnn_adv_xs_arr))
 pred_svm_adv_y2 = torch.max(test_output, 1)[1].data.squeeze().numpy()
@@ -291,6 +291,6 @@ print('CNN_adv accuracy: %.3f' % cnn_adv_accuracy)
 print('SVM with cnn_adv_x accuracy: ',svm_adv_accuracy)
 print('CNN_SVM_adv with cnn_svm_adv_x accuracy: %.3f' % cnn_svm_adv_accuracy)
 print('CNN_SVM_adv with cnn_adv_x accuracy: %.3f' % cnn_svm_adv_accuracy2)
-"""
+
 
 
