@@ -1,18 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="PublishConfigData">
+  <component name="PublishConfigData" serverName="172.16.100.90">
     <serverData>
-      <paths name="mi@192.168.145.130:22">
+      <paths name="172.16.100.90">
         <serverdata>
           <mappings>
-            <mapping local="$PROJECT_DIR$" web="/" />
+            <mapping deploy="/" local="$PROJECT_DIR$" web="/" />
           </mappings>
         </serverdata>
       </paths>
-      <paths name="mi@192.168.145.130:22 (1)">
+      <paths name="junhang@172.16.100.90:22">
         <serverdata>
           <mappings>
-            <mapping local="$PROJECT_DIR$" web="/" />
+            <mapping deploy="/home/junhang/Projects/Scripts/src/pycharm" local="$PROJECT_DIR$" />
+          </mappings>
+        </serverdata>
+      </paths>
+      <paths name="junhang@172.16.100.90:22 (1)">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/tmp/pycharm_project_684" local="$PROJECT_DIR$" />
           </mappings>
         </serverdata>
       </paths>

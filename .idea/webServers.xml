@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="WebServers">
+    <option name="servers">
+      <webServer id="f1fa0ae2-a5b5-4f3c-a4eb-eb2dbd8c989a" name="172.16.100.90" url="http://172.16.100.90:81">
+        <fileTransfer host="172.16.100.90" port="22" rootFolder="/home/junhang/Projects/Scripts/src/pycharm" accessType="SFTP">
+          <advancedOptions>
+            <advancedOptions controlEncoding="utf-8" dataProtectionLevel="Private" shareSSLContext="true" />
+          </advancedOptions>
+          <option name="port" value="22" />
+        </fileTransfer>
+      </webServer>
+    </option>
+  </component>
+</project>
