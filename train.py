@@ -43,8 +43,9 @@ def train_cnn(model, train_loader, device, num_epoch=2, lr=1e-3):
         train_loss = 0
         for step, (batch_x, batch_y) in enumerate(train_loader):
             batch_x = batch_x.to(device)
+            batch_y = batch_y.to(device)
             optimizer.zero_grad()
-            preds = model(batch_x)
+            preds = model(batch_x)[0]
             loss = loss_func(preds, batch_y)
             loss.backward()
             train_loss = loss.item()
@@ -79,15 +80,15 @@ if __name__ == "__main__":
     train_loader = Data.DataLoader(dataset=train_data, batch_size=128, shuffle=True)
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    """
+
     print("--------------------VAE training--------------------------------")
     vae = VAE()
     vae = vae.to(device)
-    train_vae(vae, train_loader, vae_loss, device, num_epoch=20)
+    train_vae(vae, train_loader, vae_loss, device, num_epoch=2)
     torch.save(vae, '/home/junhang/Projects/Scripts/saved_model/vae.pkl')
-    """
+
     print("--------------------CNN training--------------------------------")
     cnn = CNN()
     cnn = cnn.to(device)
-    train_cnn(cnn, train_loader, device, num_epoch=20)
+    train_cnn(cnn, train_loader, device, num_epoch=2)
     torch.save(cnn, '/home/junhang/Projects/Scripts/saved_model/cnn.pkl')
