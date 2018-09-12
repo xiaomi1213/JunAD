@@ -28,7 +28,7 @@ class VAE(nn.Module):
 
     def decoder(self, z):
         h3 = F.relu(self.fc3(z))
-        recon_x = F.sigmoid(self.fc4(h3))
+        recon_x = torch.sigmoid(self.fc4(h3))
         return recon_x
 
     def forward(self, x):

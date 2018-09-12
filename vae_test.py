@@ -1,67 +1,64 @@
+from __future__ import print_function
+import argparse
 import torch
-import torchvision
-import numpy as np
-
-EPOCH = 1
-BATCH_SIZE = 100
-LR = 0.001
-DOWNLOAD_MNIST = False
-num_train = 6000
-num_test = 1000
-
-mnist_train = torchvision.datasets.MNIST(
-    root=r'E:\Bluedon\2DataSet\mnist',
-    train=True,
-    transform=torchvision.transforms.ToTensor(),
-    download=DOWNLOAD_MNIST
-)
-train_x = mnist_train.train_data[:num_train]
-train_y = mnist_train.train_labels[:num_train]
-print(train_x.size())
-print(train_y.size())
-#show_a_image(mnist_train.train_data[0].numpy())
-
-train_loader = Data.DataLoader(dataset=mnist_train, batch_size=BATCH_SIZE, shuffle=True)
-
-test_data = torchvision.datasets.MNIST(root=r'E:\Bluedon\2DataSet\mnist',train=False)
-test_x = torch.unsqueeze(test_data.test_data, dim=1).type(torch.FloatTensor)/255.
-test_y = test_data.test_labels
-test_x = test_x[:num_test]
-test_y = test_y[:num_test]
+import torch.utils.data
+from torch import nn, optim
+from torch.nn import functional as F
+from torchvision import datasets, transforms
+from torchvision.utils import save_image
+from vae_test_2 import VAE2
 
 
-# evaluate the cnn model
-cnn_test_x = test_x
-cnn_test_y = test_y
-cnn_test_output = pretrained_cnn(cnn_test_x)
-pred_y = torch.max(cnn_test_output, 1)[1].data.squeeze().numpy()
-cnn_accuracy = float((pred_y == cnn_test_y.data.numpy()).astype(int).sum())/float(cnn_test_y.size(0))
-print('CNN accuracy: %.3f' % cnn_accuracy)
-
-# select the correctly classified samples indices
-a = (pred_y == cnn_test_y.data.numpy()).astype(int)
-cnn_indice = []
-for i in range(num_test):
-    if a[i] == 1:
-        cnn_indice.append(i)
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
-# generate adv_x with CNN
-mean = np.array([0.485, 0.456, 0.406]).reshape((3, 1, 1))
-std = np.array([0.229, 0.224, 0.225]).reshape((3, 1, 1))
-cnn_model = foolbox.models.PyTorchModel(pretrained_cnn.eval(), bounds=(0, 1), num_classes=10, preprocessing=(0, 1))
-cnn_attack = foolbox.attacks.FGSM(cnn_model)
-cnn_adv_test_x = test_x.data.numpy()[cnn_indice]
-cnn_adv_test_y = test_y.data.numpy()[cnn_indice]
+train_loader = torch.utils.data.DataLoader(
+    datasets.MNIST('../data', train=True, download=True,
+                   transform=transforms.ToTensor()),
+    batch_size=128, shuffle=True)
+test_loader = torch.utils.data.DataLoader(
+    datasets.MNIST('../data', train=False, transform=transforms.ToTensor()),
+    batch_size=128, shuffle=True)
 
-cnn_adv_xs = []
-for i in range(len(cnn_indice)):
-    cnn_adv_x = cnn_attack(cnn_adv_test_x[i],cnn_adv_test_y[i])
-    cnn_adv_xs.append(cnn_adv_x)
 
-cnn_adv_xs_arr = np.array(cnn_adv_xs)
-print(cnn_adv_xs_arr.shape)
-#cnn_adv_xs = np.transpose(cnn_adv_xs,(0,2,3,1))
-print(cnn_adv_xs_arr.shape)
-show_a_image(np.squeeze(cnn_adv_xs[8], 0))
 
+
+model = VAE2().to(device)
+optimizer = optim.Adam(model.parameters(), lr=1e-3)
+
+
+# Reconstruction + KL divergence losses summed over all elements and batch
+def loss_function(recon_x, x, mu, logvar):
+    BCE = F.binary_cross_entropy(recon_x, x.view(-1, 784), size_average=False)
+
+    # see Appendix B from VAE paper:
+    # Kingma and Welling. Auto-Encoding Variational Bayes. ICLR, 2014
+    # https://arxiv.org/abs/1312.6114
+    # 0.5 * sum(1 + log(sigma^2) - mu^2 - sigma^2)
+    KLD = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())
+
+    return BCE + KLD
+
+
+
+train_loss = 0
+
+for epoch in range(10):
+    for batch_idx, (data, _) in enumerate(train_loader):
+        data = data.to(device)
+        optimizer.zero_grad()
+        recon_batch, mu, logvar = model(data)
+        loss = loss_function(recon_batch, data, mu, logvar)
+        loss.backward()
+        train_loss += loss.item()
+        optimizer.step()
+        if batch_idx % 10 == 0:
+            print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
+                epoch, batch_idx * len(data), len(train_loader.dataset),
+                100. * batch_idx / len(train_loader),
+                loss.item() / len(data)))
+
+    print('====> Epoch: {} Average loss: {:.4f}'.format(
+          epoch, train_loss / len(train_loader.dataset)))
+
+torch.save(model, '/home/junhang/Projects/Scripts/saved_model/test_vae.pkl')
