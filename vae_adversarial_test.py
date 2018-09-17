@@ -5,11 +5,6 @@ import torch.utils.data as Data
 import foolbox
 import numpy as np
 
-EPOCH = 1
-BATCH_SIZE = 100
-LR = 0.001
-DOWNLOAD_MNIST = False
-num_train = 6000
 num_test = 10000
 
 print("-------------------------loading data-----------------------------")
@@ -17,11 +12,13 @@ test_data = torchvision.datasets.MNIST(
     root='/home/junhang/Projects/DataSet/MNIST',
     train=False
 )
+
+
 print(test_data.test_data.size(), test_data.test_labels.size())
 test_x = torch.unsqueeze(test_data.test_data, dim=1).type(torch.FloatTensor)/255.
-test_x = test_x.cuda()
+test_x = test_x[:num_test].cuda()
 test_y = test_data.test_labels
-test_y = test_y.cuda()
+test_y = test_y[:num_test].cuda()
 
 print("\n-------------------------loading models-----------------------------\n")
 vae_model = torch.load('/home/junhang/Projects/Scripts/saved_model/vae.pkl').eval()
@@ -71,6 +68,8 @@ attack = foolbox.attacks.FGSM(fmodel)
 cnn_adv_xs = []
 for i in range(len(correct_indice)):
     cnn_adv_x = attack(cnn_adv_test_x[i],cnn_adv_test_y[i])
+    if cnn_adv_x is None:
+        continue
     cnn_adv_xs.append(cnn_adv_x)
 
 cnn_adv_xs_arr = np.array(cnn_adv_xs)

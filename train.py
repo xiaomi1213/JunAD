@@ -112,13 +112,13 @@ if __name__ == "__main__":
     print("--------------------AE training--------------------------------")
     ae = AutoEncoder()
     ae = ae.to(device)
-    train_ae(ae, train_loader, device, num_epoch=2, lr=1e-3)
+    train_ae(ae, train_loader, device, num_epoch=10, lr=1e-3)
     torch.save(ae, '/home/junhang/Projects/Scripts/saved_model/ae.pkl')
 
     print("--------------------VAE training--------------------------------")
     vae = VAE()
     vae = vae.to(device)
-    train_vae(vae, train_loader, device, num_epoch=2)
+    train_vae(vae, train_loader, device, num_epoch=10)
     torch.save(vae, '/home/junhang/Projects/Scripts/saved_model/vae.pkl')
 
     print("--------------------CNN training--------------------------------")
