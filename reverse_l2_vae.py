@@ -3,9 +3,9 @@ from torch import nn, optim
 from torch.nn import functional as F
 import numpy as np
 
-class REVERSE_VAE(nn.Module):
+class REVERSE_L2_VAE(nn.Module):
     def __init__(self, tao):
-        super(REVERSE_VAE, self).__init__()
+        super(REVERSE_L2_VAE, self).__init__()
 
         self.tao = tao
 
@@ -38,8 +38,10 @@ class REVERSE_VAE(nn.Module):
                 print('The sample is legitimate')
                 return mu
             else:
-                mu += 1.5
-                return mu
+                mu -= 5
+                std = torch.exp(0.5 * log_sigma)
+                eps = torch.randn_like(std)
+                return eps.mul(std).add_(mu)
 
 
     def decoder(self, z):

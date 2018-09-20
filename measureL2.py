@@ -5,7 +5,7 @@ import numpy as np
 
 
 # load data and model
-num_test = 10
+num_test = 10000
 test_data = torchvision.datasets.MNIST(
     root='/home/junhang/Projects/DataSet/MNIST',
     train=False

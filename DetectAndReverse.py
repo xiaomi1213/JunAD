@@ -12,12 +12,6 @@ def z_distribution():
     pass
 
 
-# define KL divergence function
-def KL_divergence(d1, d2):
-    s = d1+d2
-    return s
-
-
 # load data and model
 num_test = 10000
 test_data = torchvision.datasets.MNIST(
@@ -25,11 +19,14 @@ test_data = torchvision.datasets.MNIST(
     train=False
 )
 test_x = torch.unsqueeze(test_data.test_data, dim=1).type(torch.FloatTensor)/255.
-test_y = test_x[:num_test].cuda()
+test_x = test_x[:num_test].cuda()
+test_y = test_data.test_labels
+test_y = test_y[:num_test].cuda()
 
+cnn_model = torch.load('/home/junhang/Projects/Scripts/saved_model/cnn.pkl').eval()
 vae_model = torch.load('/home/junhang/Projects/Scripts/saved_model/vae.pkl').eval()
 rev_vae_model = torch.load('/home/junhang/Projects/Scripts/saved_model/rev_vae.pkl').eval()
-cnn_model = torch.load('/home/junhang/Projects/Scripts/saved_model/cnn.pkl').eval()
+rev_l2_vae_model = torch.load('/home/junhang/Projects/Scripts/saved_model/rev_l2_vae.pkl').eval()
 
 
 # evaluate the cnn model
@@ -94,7 +91,16 @@ print('VAE+CNN_adv accuracy: %.4f' % vae_cnn_adv_accuracy)
 
 print("-------------------------evaluate rev_vae+cnn with adv-----------------------------")
 rev_vae_x,_,_ = rev_vae_model(torch.from_numpy(cnn_adv_xs_arr).cuda())
-test_output = cnn_model(rev_vae_x.view(-1, 1, 28, 28))
-rev_vae_cnn_pred_adv_y = torch.max(test_output, 1)[1].data.squeeze().cpu().numpy()
+rev_test_output = cnn_model(rev_vae_x.view(-1, 1, 28, 28))
+rev_vae_cnn_pred_adv_y = torch.max(rev_test_output, 1)[1].data.squeeze().cpu().numpy()
 rev_vae_cnn_adv_accuracy = float((rev_vae_cnn_pred_adv_y == cnn_adv_ys_arr).astype(int).sum())/float(cnn_adv_ys_arr.shape[0])
 print('REVERSE_VAE+CNN_adv accuracy: %.4f' % rev_vae_cnn_adv_accuracy)
+
+"""
+print("-------------------------evaluate rev_l2_vae+cnn with adv-----------------------------")
+rev_l2_vae_x,_,_ = rev_l2_vae_model(torch.from_numpy(cnn_adv_xs_arr).cuda())
+test_output = cnn_model(rev_l2_vae_x.view(-1, 1, 28, 28))
+rev_l2_vae_cnn_pred_adv_y = torch.max(test_output, 1)[1].data.squeeze().cpu().numpy()
+rev_l2_vae_cnn_adv_accuracy = float((rev_l2_vae_cnn_pred_adv_y == cnn_adv_ys_arr).astype(int).sum())/float(cnn_adv_ys_arr.shape[0])
+print('REVERSE_L2_VAE+CNN_adv accuracy: %.4f' % rev_l2_vae_cnn_adv_accuracy)
+"""

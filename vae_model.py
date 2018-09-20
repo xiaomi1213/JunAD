@@ -24,7 +24,9 @@ class VAE(nn.Module):
             eps = torch.randn_like(std)
             return eps.mul(std).add_(mu)
         else:
-            return mu
+            std = torch.exp(0.5 * log_sigma)
+            eps = torch.randn_like(std)
+            return eps.mul(std).add_(mu)
 
     def decoder(self, z):
         h3 = F.relu(self.fc3(z))

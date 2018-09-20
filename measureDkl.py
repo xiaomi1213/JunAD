@@ -4,28 +4,16 @@ import foolbox
 import numpy as np
 
 
-# define normal distribution
-def standard_Gassian():
-    pass
-
-def z_distribution():
-    pass
-
-
-# define KL divergence function
-def KL_divergence(d1, d2):
-    s = d1+d2
-    return s
-
-
 # load data and model
-num_test = 10000
+num_test = 1
 test_data = torchvision.datasets.MNIST(
     root='/home/junhang/Projects/DataSet/MNIST',
     train=False
 )
 test_x = torch.unsqueeze(test_data.test_data, dim=1).type(torch.FloatTensor)/255.
-test_y = test_x[:num_test].cuda()
+test_x = test_x[:num_test].cuda()
+test_y = test_data.test_labels
+test_y = test_y[:num_test].cuda()
 
 vae_model = torch.load('/home/junhang/Projects/Scripts/saved_model/vae.pkl').eval()
 cnn_model = torch.load('/home/junhang/Projects/Scripts/saved_model/cnn.pkl').eval()
@@ -74,19 +62,28 @@ cnn_adv_xs_arr = np.array(cnn_adv_xs)
 cnn_adv_ys_arr = np.array(cnn_adv_ys)
 print(cnn_adv_xs_arr.shape)
 
+
+
+# define KL divergence function
+def KL_divergence(logvar, mu):
+    KLD = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())
+    return KLD
+
+
 # mu and sigma of normal examples
 _, mu, log_sigma = vae_model(test_x)
 
 # meausre Dkl between N(0, I) and normal examples
-score_normal = np.mean(KL_divergence(standard_Gassian, z_distribution(mu, log_sigma)))
+score_normal = KL_divergence(log_sigma[i], mu[i])/ len(mu)
 print("score_normal: ", score_normal)
 
+
 # mu and sigma of adversarial examples
-_, mu_adv, log_sigma_adv = vae_model(test_x)
-sigma_adv = np.exp(log_sigma_adv)
+_, mu_adv, log_sigma_adv = vae_model(torch.from_numpy(cnn_adv_xs_arr).cuda())
+#sigma_adv = np.exp(log_sigma_adv)
 
 # meausre Dkl between N(0, I) and adv examples
-score_adv = np.mean(KL_divergence(standard_Gassian, z_distribution(mu_adv, log_sigma_adv)))
+score_adv = KL_divergence(log_sigma_adv[i], mu_adv[i])/len(mu_adv)
 print("score_adv: ", score_adv)
 
 
