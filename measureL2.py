@@ -66,16 +66,18 @@ print(cnn_adv_xs_arr.shape)
 
 #define L2 distance
 def L2_distance(mu, log_sigma):
-    mu_distance = torch.sqrt(torch.sum(torch.squart(mu)))
-    sigma_distance = torch.sqrt(torch.sum(torch.squart(torch.exp(log_sigma)-torch.eye(log_sigma.size))))
+    mu_distance = torch.mean(torch.sqrt(torch.sum(torch.pow(mu,2), 1)))
+    m = torch.full((log_sigma.size()), 1.0).cuda()
+    sigma_distance = torch.mean(torch.sqrt(torch.sum(torch.pow((torch.exp(log_sigma)-m),2), 1)))
     return mu_distance, sigma_distance
 
 # mu and sigma of normal examples
 _, mu, log_sigma = vae_model(test_x)
+print(log_sigma.size())
 
 # meausre L2distance between N(0, I) and normal examples
 mu_dist, sigma_dist = L2_distance(mu, log_sigma)
-print(mu_dist, sigma_dist)
+print('mu_dist: ',mu_dist, 'sigma_dist: ',sigma_dist)
 
 # mu and sigma of adversarial examples
 _, mu_adv, log_sigma_adv = vae_model(torch.from_numpy(cnn_adv_xs_arr).cuda())
@@ -83,7 +85,7 @@ _, mu_adv, log_sigma_adv = vae_model(torch.from_numpy(cnn_adv_xs_arr).cuda())
 
 # meausre L2distance between N(0, I) and normal examples
 adv_mu_dist, adv_sigma_dist = L2_distance(mu_adv, log_sigma_adv)
-print(adv_mu_dist, adv_sigma_dist)
+print('adv_mu_dist: ',adv_mu_dist, 'adv_sigma_dist: ',adv_sigma_dist)
 
 
 
