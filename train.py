@@ -145,6 +145,39 @@ def train_reverse_l2_vae(model, train_loader, device, num_epoch=2, lr=1e-3):
 
         print('====> Epoch: {} Average loss: {:.4f}'.format(
             epoch, train_loss / len(train_loader.dataset)))
+def train_reg_vae(model, train_loader, device, num_epoch=2, lr=1e-3):
+    model.train()
+    optimizer = optim.Adam(model.parameters(), lr=lr)
+
+    # Reconstruction + KL divergence losses summed over all elements and batch
+    def loss_function(recon_x, x, mu, logvar):
+        BCE = F.binary_cross_entropy(recon_x, x.view(-1, 784), size_average=False)
+        # see Appendix B from VAE paper:
+        # Kingma and Welling. Auto-Encoding Variational Bayes. ICLR, 2014
+        # https://arxiv.org/abs/1312.6114
+        # 0.5 * sum(1 + log(sigma^2) - mu^2 - sigma^2)
+        KLD = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())
+        return BCE + KLD
+
+    train_loss = 0
+
+    for epoch in range(num_epoch):
+        for batch_idx, (data, _) in enumerate(train_loader):
+            data = data.to(device)
+            optimizer.zero_grad()
+            recon_batch, mu, logvar = model(data)
+            loss = loss_function(recon_batch, data, mu, logvar)
+            loss.backward()
+            train_loss += loss.item()
+            optimizer.step()
+            if batch_idx % 10 == 0:
+                print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
+                    epoch, batch_idx * len(data), len(train_loader.dataset),
+                           100. * batch_idx / len(train_loader),
+                           loss.item() / len(data)))
+
+        print('====> Epoch: {} Average loss: {:.4f}'.format(
+            epoch, train_loss / len(train_loader.dataset)))
 
 
 
@@ -160,6 +193,7 @@ if __name__ == "__main__":
     from ae_model import AutoEncoder
     from reverse_vae import REVERSE_VAE
     from reverse_l2_vae import REVERSE_L2_VAE
+    from reg_vae import REG_VAE
 
     train_data = torchvision.datasets.MNIST(
         root='/home/junhang/Projects/DataSet/MNIST',
@@ -198,13 +232,18 @@ if __name__ == "__main__":
     train_reverse_l2_vae(rev_l2_vae, train_loader, device, num_epoch=10)
     torch.save(rev_l2_vae, '/home/junhang/Projects/Scripts/saved_model/rev_l2_vae.pkl')
     
-    """
-
-
     print("--------------------REVERSE VAE training--------------------------------")
     rev_vae = REVERSE_VAE(tao=2.0)
     rev_vae = rev_vae.to(device)
     train_reverse_vae(rev_vae, train_loader, device, num_epoch=10)
     torch.save(rev_vae, '/home/junhang/Projects/Scripts/saved_model/rev_vae.pkl')
+    """
+
+
+    print("--------------------REG VAE training--------------------------------")
+    reg_vae = REG_VAE(tao=2.0,)
+    reg_vae = reg_vae.to(device)
+    train_reg_vae(reg_vae, train_loader, device, num_epoch=10)
+    torch.save(reg_vae, '/home/junhang/Projects/Scripts/saved_model/reg_vae.pkl')
 
 

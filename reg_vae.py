@@ -8,21 +8,21 @@ class REG_VAE(nn.Module):
         super(REG_VAE, self).__init__()
 
         self.tao = tao
-
+        #self.mu_normal = mu_normal
+        #self.log_sigma_normal = log_sigma_normal
         self.fc1 = nn.Linear(784, 512)
         self.fc2_mu = nn.Linear(512, 20)
         self.fc2_sigma = nn.Linear(512, 20)
         self.fc3 = nn.Linear(20, 512)
         self.fc4 = nn.Linear(512, 784)
 
-    def KL_divergence(logvar, mu):
+    def KL_divergence(self, logvar, mu):
         KLD = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())
         return KLD
 
-    def L2_distance(mu, log_sigma):
-        mu_distance = torch.mean(torch.sqrt(torch.sum(torch.pow(mu, 2), 1)))
-        m = torch.full((log_sigma.size()), 1.0).cuda()
-        sigma_distance = torch.mean(torch.sqrt(torch.sum(torch.pow((torch.exp(log_sigma) - m), 2), 1)))
+    def L2_reg_distance(self, mu, log_sigma, mu_normal, log_sigma_normal):
+        mu_distance = torch.mean(torch.sqrt(torch.sum(torch.pow(mu-mu_normal, 2), 1)))
+        sigma_distance = torch.mean(torch.sqrt(torch.sum(torch.pow((torch.exp(log_sigma) - torch.exp(log_sigma_normal)), 2), 1)))
         return mu_distance, sigma_distance
 
     def encoder(self, x):
@@ -39,8 +39,11 @@ class REG_VAE(nn.Module):
         else:
             #return mu
             # detecting and reversing
+            mu_normal = torch.from_numpy(np.array()).cuda()
+            log_sigma_normal = torch.from_numpy(np.array()).cuda()
             reg_Dkl = -0.5 * torch.sum(1 + log_sigma - mu.pow(2) - log_sigma.exp()) \
-                      -self.L2_distance(mu, log_sigma)[0] - self.L2_distance(mu, log_sigma)[1]
+                      - self.L2_reg_distance(mu, log_sigma, mu_normal, log_sigma_normal)[0] \
+                            - self.L2_reg_distance(mu, log_sigma, mu_normal, log_sigma_normal)[1]
             reg_Dkl = reg_Dkl/len(mu)
             print("Dkl_score: ", reg_Dkl)
 
@@ -61,7 +64,8 @@ class REG_VAE(nn.Module):
                     log_sigma += torch.mul(gradients[1],LR)
 
                     update_score = -0.5 * torch.sum(1 + log_sigma - mu.pow(2) - log_sigma.exp()) \
-                      -self.L2_distance(mu, log_sigma)[0] - self.L2_distance(mu, log_sigma)[1]
+                      - self.L2_reg_distance(mu, log_sigma, mu_normal, log_sigma_normal)[0] \
+                            - self.L2_reg_distance(mu, log_sigma, mu_normal, log_sigma_normal)[1]
                     update_score = update_score / len(mu)
                     print("update_score: ", update_score)
 

@@ -5,7 +5,7 @@ import numpy as np
 
 
 # load data and model
-num_test = 1
+num_test = 10000
 test_data = torchvision.datasets.MNIST(
     root='/home/junhang/Projects/DataSet/MNIST',
     train=False
@@ -74,7 +74,7 @@ def KL_divergence(logvar, mu):
 _, mu, log_sigma = vae_model(test_x)
 
 # meausre Dkl between N(0, I) and normal examples
-score_normal = KL_divergence(log_sigma[i], mu[i])/ len(mu)
+score_normal = KL_divergence(log_sigma, mu)/ len(mu)
 print("score_normal: ", score_normal)
 
 
@@ -83,10 +83,15 @@ _, mu_adv, log_sigma_adv = vae_model(torch.from_numpy(cnn_adv_xs_arr).cuda())
 #sigma_adv = np.exp(log_sigma_adv)
 
 # meausre Dkl between N(0, I) and adv examples
-score_adv = KL_divergence(log_sigma_adv[i], mu_adv[i])/len(mu_adv)
+score_adv = KL_divergence(log_sigma_adv, mu_adv)/len(mu_adv)
 print("score_adv: ", score_adv)
 
 
+print("-------------------------get average mu and sigma of normal examples-----------------------------")
+_, mu, log_sigma = vae_model(test_x)
+average_mu = torch.mean(mu, 1)
+average_log_sigma = torch.mean(log_sigma, 1)
+print("average_mu", average_mu, "average_log_sigma", average_log_sigma)
 
 
 
