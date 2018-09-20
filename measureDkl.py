@@ -2,10 +2,11 @@ import torch
 import torchvision
 import foolbox
 import numpy as np
+import pickle
 
 
 # load data and model
-num_test = 10000
+num_test = 100
 test_data = torchvision.datasets.MNIST(
     root='/home/junhang/Projects/DataSet/MNIST',
     train=False
@@ -92,6 +93,7 @@ _, mu, log_sigma = vae_model(test_x)
 average_mu = torch.mean(mu, 1)
 average_log_sigma = torch.mean(log_sigma, 1)
 print("average_mu", average_mu, "average_log_sigma", average_log_sigma)
+
 
 
 
