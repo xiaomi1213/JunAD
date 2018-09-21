@@ -45,10 +45,47 @@ print("d gradients are fine")
 print(d)
 """
 
-a = np.array([ 0.0187, -0.3948,  0.2555, -0.9905, -0.8428,  0.0551,  0.3222, -0.6254,
-         -0.3385, -0.0504,  0.1580,  0.5903,  0.0995,  0.4910, -0.4610, -0.0508,
-         -0.7808,  0.0267, -0.5674,  0.8931])
-c = [1,2]
-#b = 1 * a
-d = 0.1 * c
-print(d)
+
+def L2_reg_distance(mu, log_sigma, mu_normal, log_sigma_normal):
+    mu_distance = torch.mean(torch.sum(torch.pow(mu - mu_normal, 2), 1))
+    sigma_distance = torch.mean(
+        torch.sum(torch.pow((torch.exp(log_sigma) - torch.exp(log_sigma_normal)), 2), 1))
+    return mu_distance, sigma_distance
+
+mu_normal = torch.from_numpy(np.array([ 0, 0, 0, 0, 0])).type(torch.FloatTensor).cuda()
+
+log_sigma_normal = torch.from_numpy(np.array([0, 0, 0, 0, 0])).type(torch.FloatTensor).cuda()
+
+mu = torch.from_numpy(np.array([ -0.5,  -0.5,  -0.5, -0.5,  -0.5])).type(torch.FloatTensor).cuda()
+#mu = torch.autograd.Variable(mu, requires_grad=True)
+log_sigma = torch.from_numpy(np.array([0, 0, 0, 0, 0])).type(torch.FloatTensor).cuda()
+#log_sigma = torch.autograd.Variable(log_sigma, requires_grad=True)
+
+reg_Dkl = torch.pow(torch.norm((mu-mu_normal),2),2)+torch.pow(torch.norm((log_sigma-log_sigma_normal),2),2)
+reg_Dkl = torch.autograd.Variable(reg_Dkl,requires_grad=True)
+
+opt = torch.optim.Adam((mu, log_sigma), lr=1e-2)
+for i in range(5):
+    opt.zero_grad()
+    reg_Dkl.backward()
+    opt.step()
+    print(mu.grad)
+
+    print(mu)
+    print(reg_Dkl)
+
+
+a = torch.FloatTensor([2])
+x = torch.FloatTensor([2,3,4])
+target = torch.FloatTensor([1])
+y = a*torch.sum(x)
+loss = y-target
+
+loss = torch.autograd.Variable(loss, requires_grad=True)
+opt1 = torch.optim.Adam([a,x],lr=1e-2)
+for i in range(5):
+    opt1.zero_grad()
+    loss.backward()
+    opt1.step()
+    print(loss)
+

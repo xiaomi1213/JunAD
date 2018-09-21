@@ -6,7 +6,7 @@ import pickle
 
 
 # load data and model
-num_test = 100
+num_test = 1000
 test_data = torchvision.datasets.MNIST(
     root='/home/junhang/Projects/DataSet/MNIST',
     train=False
@@ -90,8 +90,8 @@ print("score_adv: ", score_adv)
 
 print("-------------------------get average mu and sigma of normal examples-----------------------------")
 _, mu, log_sigma = vae_model(test_x)
-average_mu = torch.mean(mu, 1)
-average_log_sigma = torch.mean(log_sigma, 1)
+average_mu = torch.mean(mu,0).type(torch.FloatTensor)
+average_log_sigma = torch.mean(log_sigma,0).type(torch.FloatTensor)
 print("average_mu", average_mu, "average_log_sigma", average_log_sigma)
 
 
