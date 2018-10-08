@@ -37,5 +37,5 @@ class VAE(nn.Module):
         exp, var = self.encoder(x.view(-1, 784))
         z = self.reparameterize(exp, var)
         recon_x = self.decoder(z)
-        return recon_x, exp, var
+        return recon_x, exp, var, z
 

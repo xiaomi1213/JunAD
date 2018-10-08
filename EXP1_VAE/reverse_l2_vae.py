@@ -3,9 +3,9 @@ from torch import nn, optim
 from torch.nn import functional as F
 import numpy as np
 
-class REVERSE_VAE(nn.Module):
+class REVERSE_L2_VAE(nn.Module):
     def __init__(self, tao):
-        super(REVERSE_VAE, self).__init__()
+        super(REVERSE_L2_VAE, self).__init__()
 
         self.tao = tao
 
@@ -32,37 +32,16 @@ class REVERSE_VAE(nn.Module):
             eps = torch.randn_like(std)
             return eps.mul(std).add_(mu)
         else:
-            #return mu
             # detecting and reversing
-            Dkl = -0.5 * torch.sum(1 + log_sigma - mu.pow(2) - log_sigma.exp())
-            Dkl = Dkl/len(mu)
-            print("Dkl_score: ", Dkl)
-
-            if Dkl <= self.tao:
-                print("The sample is legitimate")
+            mu_distance = torch.mean(torch.sqrt(torch.sum(torch.pow(mu,2), 1)))
+            if mu_distance > 3:
+                print('The sample is legitimate')
                 return mu
-
             else:
-                print("The sample is adversarial, reversing it")
-                #update_mu = mu.clone()
-                #update_log_sigma = log_sigma.clone()
-                update_score = Dkl.clone()
-                LR = 1e-2
-                for i in range(5000):
-                    gradients = torch.autograd.grad(update_score, [mu, log_sigma],  allow_unused=True,retain_graph=True)
-                    #print(gradients)
-                    mu += torch.mul(gradients[0],LR)
-                    log_sigma += torch.mul(gradients[1],LR)
-
-                    update_score = -0.5 * torch.sum(1 + log_sigma - mu.pow(2) - log_sigma.exp())
-                    update_score = update_score / len(mu)
-                    print("update_score: ", update_score)
-
-
+                mu += 10
                 std = torch.exp(0.5 * log_sigma)
                 eps = torch.randn_like(std)
                 return eps.mul(std).add_(mu)
-                #return update_mu
 
 
     def decoder(self, z):
@@ -91,6 +70,7 @@ class REVERSE_VAE(nn.Module):
                     rev_optim.step()
                     # Dkl = -0.5 * torch.sum(1 + log_sigma - mu.pow(2) - log_sigma.exp())
             """
+
         z = self.reparameterize(exp, var)
         recon_x = self.decoder(z)
         return recon_x, exp, var

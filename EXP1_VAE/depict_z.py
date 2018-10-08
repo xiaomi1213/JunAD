@@ -5,6 +5,21 @@ import scipy
 import matplotlib.pyplot as plt
 from matplotlib import animation
 
+
+# load test data
+num_test = 1
+test_data = torchvision.datasets.MNIST(
+    root = '/home/junhang/Projects/DataSet/MNIST',
+    train=False)
+test_x = torch.unsqueeze(test_data.test_data, dim=1).type(torch.FloatTensor)/255.
+test_x = test_x[:num_test].cuda()
+
+
+# latent variable contours of normal examples
+vae_depict_model = torch.load('/home/junhang/Projects/Scripts/saved_model/vae_depict_model.pkl')
+#for point in test_data:
+_, mu, var,_ = vae_depict_model(test_x)
+
 # define Gaussian function for display
 def Gaussian(x, mu, sigma):
     k = len(mu)
@@ -17,22 +32,6 @@ def Gaussian(x, mu, sigma):
 x1 = np.linspace(-2.0, 2.0, 10)
 x2 = np.linspace(-2.0, 2.0, 10)
 X1, X2 = np.meshgrid(x1, x2)
-
-
-
-# load test data
-num_test = 10000
-test_data = torchvision.datasets.MNIST(
-    root = '/home/junhang/Projects/DataSet/MNIST',
-    train=False)
-test_x = torch.unsqueeze(test_data.test_data, dim=1).type(torch.FloatTensor)/255.
-test_x = test_x[:num_test].cuda()
-
-
-# latent variable contours of normal examples
-vae_depict_model = torch.load('/home/junhang/Projects/Scripts/saved_model/vae_depict_model.pkl')
-#for point in test_data:
-_, mu, var = vae_depict_model(test_x[0])
 
 mu_vector = np.transpose(mu.cpu().data.numpy())
 sigma_matrix = np.diag(np.squeeze(np.exp(var.cpu().data.numpy()), 0))

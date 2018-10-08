@@ -3,17 +3,17 @@ import torchvision
 import foolbox
 import numpy as np
 import pickle
-
+import matplotlib.pyplot as plt
 
 # load data and model
-num_test = 1000
+num_test = 30000
 test_data = torchvision.datasets.MNIST(
     root='/home/junhang/Projects/DataSet/MNIST',
-    train=False
+    train=True
 )
-test_x = torch.unsqueeze(test_data.test_data, dim=1).type(torch.FloatTensor)/255.
+test_x = torch.unsqueeze(test_data.train_data, dim=1).type(torch.FloatTensor)/255.
 test_x = test_x[:num_test].cuda()
-test_y = test_data.test_labels
+test_y = test_data.train_labels
 test_y = test_y[:num_test].cuda()
 
 vae_model = torch.load('/home/junhang/Projects/Scripts/saved_model/vae.pkl').eval()
@@ -67,29 +67,31 @@ print(cnn_adv_xs_arr.shape)
 
 # define KL divergence function
 def KL_divergence(logvar, mu):
-    KLD = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())
+    KLD = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp(),1)
     return KLD
 
 
 # mu and sigma of normal examples
-_, mu, log_sigma = vae_model(test_x)
+_, mu, log_sigma,_ = vae_model(test_x)
 
 # meausre Dkl between N(0, I) and normal examples
-score_normal = KL_divergence(log_sigma, mu)/ len(mu)
+score_normal = KL_divergence(log_sigma, mu)
 print("score_normal: ", score_normal)
-
+plt.hist(score_normal.data.cpu().numpy(), bins=100)
+plt.show()
 
 # mu and sigma of adversarial examples
-_, mu_adv, log_sigma_adv = vae_model(torch.from_numpy(cnn_adv_xs_arr).cuda())
+_, mu_adv, log_sigma_adv, _ = vae_model(torch.from_numpy(cnn_adv_xs_arr).cuda())
 #sigma_adv = np.exp(log_sigma_adv)
 
 # meausre Dkl between N(0, I) and adv examples
-score_adv = KL_divergence(log_sigma_adv, mu_adv)/len(mu_adv)
+score_adv = KL_divergence(log_sigma_adv, mu_adv)
 print("score_adv: ", score_adv)
-
+plt.hist(score_adv.data.cpu().numpy(), bins=100)
+plt.show()
 
 print("-------------------------get average mu and sigma of normal examples-----------------------------")
-_, mu, log_sigma = vae_model(test_x)
+_, mu, log_sigma,_ = vae_model(test_x)
 average_mu = torch.mean(mu,0).type(torch.FloatTensor)
 average_log_sigma = torch.mean(log_sigma,0).type(torch.FloatTensor)
 print("average_mu", average_mu, "average_log_sigma", average_log_sigma)
