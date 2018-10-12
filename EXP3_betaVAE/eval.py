@@ -1,38 +1,9 @@
 import torch
 import numpy as np
-
+import torchvision
+import torch.utils.data as Data
 """
-mu = torch.autograd.Variable(torch.FloatTensor([0, 0]), requires_grad=True)
-#mu = torch.autograd.Variable(mu, requires_grad=True)
-log_sigma = torch.autograd.Variable(torch.FloatTensor([0, 0]), requires_grad=True)
-#log_sigma = torch.autograd.Variable(log_sigma, requires_grad=True)
 
-score = -0.5 * torch.sum(1 + log_sigma - mu.pow(2) - log_sigma.exp())
-#score = torch.autograd.Variable(score)
-print("score: ", score)
-
-
-
-#optimiser = torch.optim.Adam([mu, log_sigma], lr=1e-3)
-
-update_mu = mu.clone()
-update_log_sigma = log_sigma.clone()
-
-for i in range(250):
-    gradients = torch.autograd.grad(score, [mu, log_sigma],retain_graph=True)
-    #print(gradients)
-    update_mu += -1 * (1e-3) * gradients[0]
-    update_log_sigma += -1 * (1e-3) * gradients[1]
-
-update_score = -0.5 * torch.sum(1 + update_log_sigma - update_mu.pow(2) - update_log_sigma.exp())
-
-print("update_score: ", update_score)
-print('update_mu:', update_mu)
-print('update_log_sigma',update_log_sigma)
-
-print("score: ", score)
-print('mu:', mu)
-print('sigma',log_sigma)
 
 
 
@@ -130,7 +101,7 @@ def MD(x, mu, log_sigma):
 
 print(distance)
 
-"""
+
 def MD_torch(x, mu, log_sigma):
     sigma = torch.diag(torch.exp(log_sigma))
     d = x - mu
@@ -149,3 +120,37 @@ log_sigma = np.array([0.,0.])
 log_sigma = torch.from_numpy(log_sigma)
 distance = MD_torch(a, mu, log_sigma)
 print(distance)
+"""
+mu = torch.autograd.Variable(torch.FloatTensor([[0, 0], [1, 1]]), requires_grad=True)
+#mu = torch.autograd.Variable(mu, requires_grad=True)
+log_sigma = torch.autograd.Variable(torch.FloatTensor([[0, 0], [1, 1]]), requires_grad=True)
+#log_sigma = torch.autograd.Variable(log_sigma, requires_grad=True)
+
+score = -0.5 * torch.sum(1 + log_sigma - mu.pow(2) - log_sigma.exp(),1)
+#score = torch.autograd.Variable(score)
+print("score: ", score)
+print(score.size())
+
+
+
+#optimiser = torch.optim.Adam([mu, log_sigma], lr=1e-3)
+
+update_mu = mu.clone()
+update_log_sigma = log_sigma.clone()
+
+for i in range(250):
+    gradients = torch.autograd.grad(score, [mu, log_sigma],retain_graph=True)
+    #print(gradients)
+    update_mu += -1 * (1e-3) * gradients[0]
+    update_log_sigma += -1 * (1e-3) * gradients[1]
+
+update_score = -0.5 * torch.sum(1 + update_log_sigma - update_mu.pow(2) - update_log_sigma.exp())
+
+print(update_score.size())
+print("update_score: ", update_score)
+print('update_mu:', update_mu)
+print('update_log_sigma',update_log_sigma)
+
+print("score: ", score)
+print('mu:', mu)
+print('sigma',log_sigma)
