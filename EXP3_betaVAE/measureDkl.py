@@ -15,12 +15,12 @@ test_x = test_x[:num_test].cuda()
 test_y = test_data.train_labels
 test_y = test_y[:num_test].cuda()
 
-cnn_model = torch.load('/home/junhang/Projects/Scripts/saved_model/cnn.pkl').eval()
-vae_model = torch.load('/home/junhang/Projects/Scripts/saved_model/vae.pkl').eval()
-beta_vae_b = torch.load('/home/junhang/Projects/Scripts/saved_model/beta_vae_b.pkl').eval()
+cnn_model = torch.load('/home/junhang/Projects/Scripts/saved_model/EXP3/cnn.pkl').eval()
+vae_model = torch.load('/home/junhang/Projects/Scripts/saved_model/EXP3/vae.pkl').eval()
+beta_vae_b = torch.load('/home/junhang/Projects/Scripts/saved_model/EXP3/beta_vae_b.pkl').eval()
 
-beta_vae_h_5 = torch.load('/home/junhang/Projects/Scripts/saved_model/beta_vae_h_10.pkl').eval()
-beta_vae_h_6 = torch.load('/home/junhang/Projects/Scripts/saved_model/beta_vae_h_100.pkl').eval()
+beta_vae_h_5 = torch.load('/home/junhang/Projects/Scripts/saved_model/EXP3/beta_vae_h_10.pkl').eval()
+beta_vae_h_6 = torch.load('/home/junhang/Projects/Scripts/saved_model/EXP3/beta_vae_h_100.pkl').eval()
 
 # evaluate the cnn model
 print("-------------------------evaluating cnn model-----------------------------")

@@ -21,11 +21,11 @@ test_y = test_data.test_labels
 test_y = test_y[:num_test].cuda()
 
 print("\n-------------------------loading models-----------------------------\n")
-vae_model = torch.load('/home/junhang/Projects/Scripts/saved_model/vae.pkl').eval()
-cnn_model = torch.load('/home/junhang/Projects/Scripts/saved_model/cnn.pkl').eval()
-ae_model = torch.load('/home/junhang/Projects/Scripts/saved_model/ae.pkl').eval()
-beta_vae_h_6 = torch.load('/home/junhang/Projects/Scripts/saved_model/beta_vae_h_100.pkl').eval()
-beta_vae_b = torch.load('/home/junhang/Projects/Scripts/saved_model/beta_vae_b.pkl').eval()
+vae_model = torch.load('/home/junhang/Projects/Scripts/saved_model/EXP3/vae.pkl').eval()
+cnn_model = torch.load('/home/junhang/Projects/Scripts/saved_model/EXP3/cnn.pkl').eval()
+ae_model = torch.load('/home/junhang/Projects/Scripts/saved_model/EXP3/ae.pkl').eval()
+beta_vae_h_6 = torch.load('/home/junhang/Projects/Scripts/saved_model/EXP3/beta_vae_h_100.pkl').eval()
+beta_vae_b = torch.load('/home/junhang/Projects/Scripts/saved_model/EXP3/beta_vae_b.pkl').eval()
 
 # evaluate the cnn model
 print("-------------------------evaluating cnn model-----------------------------")
