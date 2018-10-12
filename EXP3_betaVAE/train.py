@@ -103,11 +103,12 @@ if __name__ == "__main__":
     train_beta_vae_h(beta_vae_h, train_loader, device, num_epoch=10)
     torch.save(beta_vae_h, '/home/junhang/Projects/Scripts/saved_model/beta_vae_h.pkl')
     
-    """
     print("--------------------BETA_VAE_B training--------------------------------")
     beta_vae_b = BetaVAE()
     beta_vae_b = beta_vae_b.to(device)
     train_beta_vae_b(beta_vae_b, train_loader, device, C_max=25, C_stop_iter=10, gamma=1000, num_epoch=10)
     torch.save(beta_vae_b, '/home/junhang/Projects/Scripts/saved_model/beta_vae_b.pkl')
+    """
+
 
 

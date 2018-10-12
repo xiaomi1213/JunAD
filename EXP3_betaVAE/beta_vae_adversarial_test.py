@@ -24,7 +24,8 @@ print("\n-------------------------loading models-----------------------------\n"
 vae_model = torch.load('/home/junhang/Projects/Scripts/saved_model/vae.pkl').eval()
 cnn_model = torch.load('/home/junhang/Projects/Scripts/saved_model/cnn.pkl').eval()
 ae_model = torch.load('/home/junhang/Projects/Scripts/saved_model/ae.pkl').eval()
-vae_depict_model = torch.load('/home/junhang/Projects/Scripts/saved_model/vae_depict_model.pkl')
+beta_vae_h_6 = torch.load('/home/junhang/Projects/Scripts/saved_model/beta_vae_h_100.pkl').eval()
+beta_vae_b = torch.load('/home/junhang/Projects/Scripts/saved_model/beta_vae_b.pkl').eval()
 
 # evaluate the cnn model
 print("-------------------------evaluating cnn model-----------------------------")
@@ -40,12 +41,26 @@ ae_cnn_pred_y = torch.max(test_output, 1)[1].data.squeeze().cpu().numpy()
 ae_cnn_accuracy = float((ae_cnn_pred_y == test_y.data.cpu().numpy()).astype(int).sum())/float(test_y.shape[0])
 print('AE+CNN accuracy: %.4f' % ae_cnn_accuracy)
 
-print("-------------------------evaluate vae+cnn with normal-----------------------------")
-vae_x,_,_,_ = vae_depict_model(test_x.cuda())
+print("-------------------------evaluate vae+cnn with adv-----------------------------")
+vae_x,_,_,_ = vae_model(test_x.view(-1, 784).cuda())
 test_output = cnn_model(vae_x.view(-1, 1, 28, 28))
 vae_cnn_pred_y = torch.max(test_output, 1)[1].data.squeeze().cpu().numpy()
 vae_cnn_accuracy = float((vae_cnn_pred_y == test_y.data.cpu().numpy()).astype(int).sum())/float(test_y.shape[0])
 print('VAE+CNN accuracy: %.4f' % vae_cnn_accuracy)
+
+print("-------------------------evaluate beta_vae_h_6+cnn with normal-----------------------------")
+vae_x,_,_ = beta_vae_h_6(test_x.cuda())
+test_output = cnn_model(vae_x)
+vae_cnn_pred_y = torch.max(test_output, 1)[1].data.squeeze().cpu().numpy()
+vae_cnn_accuracy = float((vae_cnn_pred_y == test_y.data.cpu().numpy()).astype(int).sum())/float(test_y.shape[0])
+print('BETA_VAE_H_6+CNN accuracy: %.4f' % vae_cnn_accuracy)
+
+print("-------------------------evaluate beta_vae_b+cnn with normal-----------------------------")
+vae_x,_,_ = beta_vae_b(test_x.cuda())
+test_output = cnn_model(vae_x)
+vae_cnn_pred_y = torch.max(test_output, 1)[1].data.squeeze().cpu().numpy()
+vae_cnn_accuracy = float((vae_cnn_pred_y == test_y.data.cpu().numpy()).astype(int).sum())/float(test_y.shape[0])
+print('BETA_VAE_b+CNN accuracy: %.4f' % vae_cnn_accuracy)
 
 
 # select the correctly classified samples indices
@@ -99,13 +114,34 @@ cnn_pred_adv_y = torch.max(test_output, 1)[1].data.squeeze().cpu().numpy()
 cnn_adv_accuracy = float((cnn_pred_adv_y == cnn_adv_ys_arr).astype(int).sum())/float(cnn_adv_ys_arr.shape[0])
 print('CNN_adv accuracy: %.4f' % cnn_adv_accuracy)
 
+print("-------------------------evaluate ae+cnn with adv-----------------------------")
+_,ae_x = ae_model(torch.from_numpy(cnn_adv_xs_arr).view(-1, 784).cuda())
+test_output = cnn_model(ae_x.view(-1, 1, 28, 28))
+ae_cnn_pred_adv_y = torch.max(test_output, 1)[1].data.squeeze().cpu().numpy()
+ae_cnn_adv_accuracy = float((ae_cnn_pred_adv_y == cnn_adv_ys_arr).astype(int).sum())/float(cnn_adv_ys_arr.shape[0])
+print('AE+CNN_adv accuracy: %.4f' % ae_cnn_adv_accuracy)
 
 print("-------------------------evaluate vae+cnn with adv-----------------------------")
-vae_x,_,_,_ = vae_depict_model(torch.from_numpy(cnn_adv_xs_arr).cuda())
+vae_x,_,_,_ = vae_model(torch.from_numpy(cnn_adv_xs_arr).cuda())
 test_output = cnn_model(vae_x.view(-1, 1, 28, 28))
 vae_cnn_pred_adv_y = torch.max(test_output, 1)[1].data.squeeze().cpu().numpy()
 vae_cnn_adv_accuracy = float((vae_cnn_pred_adv_y == cnn_adv_ys_arr).astype(int).sum())/float(cnn_adv_ys_arr.shape[0])
 print('VAE+CNN_adv accuracy: %.4f' % vae_cnn_adv_accuracy)
+
+
+print("-------------------------evaluate beta_vae_h_6+cnn with normal-----------------------------")
+beta_vae_h_x,_,_ = beta_vae_h_6(test_x.cuda())
+test_output = cnn_model(beta_vae_h_x)
+beta_vae_h_cnn_pred_adv_y = torch.max(test_output, 1)[1].data.squeeze().cpu().numpy()
+beta_vae_h_cnn_accuracy = float((beta_vae_h_cnn_pred_adv_y == cnn_adv_ys_arr).astype(int).sum())/float(test_y.shape[0])
+print('BETA_VAE_H_6+CNN_adv accuracy: %.4f' % beta_vae_h_cnn_accuracy)
+
+print("-------------------------evaluate beta_vae_b+cnn with normal-----------------------------")
+beta_vae_b_x,_,_ = beta_vae_b(test_x.cuda())
+test_output = cnn_model(beta_vae_b_x)
+beta_vae_b_cnn_pred_adv_y = torch.max(test_output, 1)[1].data.squeeze().cpu().numpy()
+beta_vae_b_cnn_accuracy = float((beta_vae_b_cnn_pred_adv_y == cnn_adv_ys_arr).astype(int).sum())/float(test_y.shape[0])
+print('BETA_VAE_b+CNN_adv accuracy: %.4f' % beta_vae_b_cnn_accuracy)
 
 
 

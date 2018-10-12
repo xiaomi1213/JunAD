@@ -18,13 +18,10 @@ test_y = test_y[:num_test].cuda()
 cnn_model = torch.load('/home/junhang/Projects/Scripts/saved_model/cnn.pkl').eval()
 vae_model = torch.load('/home/junhang/Projects/Scripts/saved_model/vae.pkl').eval()
 beta_vae_b = torch.load('/home/junhang/Projects/Scripts/saved_model/beta_vae_b.pkl').eval()
-beta_vae_h_1 = torch.load('/home/junhang/Projects/Scripts/saved_model/beta_vae_h_0.001.pkl').eval()
-beta_vae_h_2 = torch.load('/home/junhang/Projects/Scripts/saved_model/beta_vae_h_0.01.pkl').eval()
-beta_vae_h_3 = torch.load('/home/junhang/Projects/Scripts/saved_model/beta_vae_h_0.1.pkl').eval()
-beta_vae_h_4 = torch.load('/home/junhang/Projects/Scripts/saved_model/beta_vae_h_1.pkl').eval()
+
 beta_vae_h_5 = torch.load('/home/junhang/Projects/Scripts/saved_model/beta_vae_h_10.pkl').eval()
 beta_vae_h_6 = torch.load('/home/junhang/Projects/Scripts/saved_model/beta_vae_h_100.pkl').eval()
-beta_vae_h_7 = torch.load('/home/junhang/Projects/Scripts/saved_model/beta_vae_h_1000.pkl').eval()
+
 # evaluate the cnn model
 print("-------------------------evaluating cnn model-----------------------------")
 cnn_test_output = cnn_model(test_x)
@@ -89,21 +86,8 @@ plt.hist(score_normal_1.data.cpu().numpy(), bins=100, alpha=0.5, label='normal_1
 plt.hist(score_adv_1.data.cpu().numpy(), bins=100, alpha=0.5, label='adv_1')
 plt.legend(loc='upper right')
 plt.show()
-
-# beta vae b model
-# mu and sigma of normal examples
-_, mu, log_sigma = beta_vae_b(test_x)
-# meausre Dkl between N(0, I) and normal examples
-score_normal_3 = KL_divergence(log_sigma, mu)
-# mu and sigma of adversarial examples
-_, mu_adv, log_sigma_adv = beta_vae_b(torch.from_numpy(cnn_adv_xs_arr).cuda())
-# meausre Dkl between N(0, I) and adv examples
-score_adv_3 = KL_divergence(log_sigma_adv, mu_adv)
-plt.hist(score_normal_3.data.cpu().numpy(), bins=100, alpha=0.5, label='normal_3')
-plt.hist(score_adv_3.data.cpu().numpy(), bins=100, alpha=0.5, label='adv_3')
-plt.legend(loc='upper right')
-plt.show()
 """
+
 """
 # beta vae h model 0.001
 # mu and sigma of normal examples
@@ -164,7 +148,24 @@ plt.hist(score_adv_4.data.cpu().numpy(), bins=100, alpha=0.5, label='adv_4')
 plt.legend(loc='upper right')
 plt.title('beta-VAE-h-1')
 plt.show()
-"""
+
+# beta vae h model 1000
+# mu and sigma of normal examples
+_, mu, log_sigma = beta_vae_h_7(test_x)
+# meausre Dkl between N(0, I) and normal examples
+score_normal_7 = KL_divergence(log_sigma, mu)
+# mu and sigma of adversarial examples
+_, mu_adv, log_sigma_adv = beta_vae_h_7(torch.from_numpy(cnn_adv_xs_arr).cuda())
+# meausre Dkl between N(0, I) and adv examples
+score_adv_7 = KL_divergence(log_sigma_adv, mu_adv)
+plt.hist(score_normal_7.data.cpu().numpy(), bins=100, alpha=0.5, label='normal_7')
+plt.hist(score_adv_7.data.cpu().numpy(), bins=100, alpha=0.5, label='adv_7')
+plt.legend(loc='upper right')
+plt.title('beta-VAE-h-1000')
+plt.show()
+
+
+
 # beta vae h model 10
 # mu and sigma of normal examples
 _, mu, log_sigma = beta_vae_h_5(test_x)
@@ -194,19 +195,21 @@ plt.hist(score_adv_6.data.cpu().numpy(), bins=100, alpha=0.5, label='adv_6')
 plt.legend(loc='upper right')
 plt.title('beta-VAE-h-100')
 plt.show()
+"""
 
 
-# beta vae h model 1000
+# beta vae b model
 # mu and sigma of normal examples
-_, mu, log_sigma = beta_vae_h_7(test_x)
+_, mu, log_sigma = beta_vae_b(test_x)
 # meausre Dkl between N(0, I) and normal examples
-score_normal_7 = KL_divergence(log_sigma, mu)
+score_normal = KL_divergence(log_sigma, mu)
 # mu and sigma of adversarial examples
-_, mu_adv, log_sigma_adv = beta_vae_h_7(torch.from_numpy(cnn_adv_xs_arr).cuda())
+_, mu_adv, log_sigma_adv = beta_vae_b(torch.from_numpy(cnn_adv_xs_arr).cuda())
 # meausre Dkl between N(0, I) and adv examples
-score_adv_7 = KL_divergence(log_sigma_adv, mu_adv)
-plt.hist(score_normal_7.data.cpu().numpy(), bins=100, alpha=0.5, label='normal_7')
-plt.hist(score_adv_7.data.cpu().numpy(), bins=100, alpha=0.5, label='adv_7')
+score_adv = KL_divergence(log_sigma_adv, mu_adv)
+plt.hist(score_normal.data.cpu().numpy(), bins=100, alpha=0.5, label='normal')
+plt.hist(score_adv.data.cpu().numpy(), bins=100, alpha=0.5, label='adv')
 plt.legend(loc='upper right')
-plt.title('beta-VAE-h-1000')
+plt.title('beta-VAE-B')
 plt.show()
+
