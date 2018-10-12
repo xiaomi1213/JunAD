@@ -2,21 +2,22 @@ import torch
 import torchvision
 import foolbox
 import numpy as np
-
+import pickle
+import matplotlib.pyplot as plt
 
 # load data and model
-num_test = 10000
+num_test = 30000
 test_data = torchvision.datasets.MNIST(
     root='/home/junhang/Projects/DataSet/MNIST',
-    train=False
+    train=True
 )
-test_x = torch.unsqueeze(test_data.test_data, dim=1).type(torch.FloatTensor)/255.
+test_x = torch.unsqueeze(test_data.train_data, dim=1).type(torch.FloatTensor)/255.
 test_x = test_x[:num_test].cuda()
-test_y = test_data.test_labels
+test_y = test_data.train_labels
 test_y = test_y[:num_test].cuda()
 
-vae_model = torch.load('/home/junhang/Projects/Scripts/saved_model/vae.pkl').eval()
-cnn_model = torch.load('/home/junhang/Projects/Scripts/saved_model/cnn.pkl').eval()
+vae_model = torch.load('/home/junhang/Projects/Scripts/saved_model/EXP2/vae.pkl').eval()
+cnn_model = torch.load('/home/junhang/Projects/Scripts/saved_model/EXP2/cnn.pkl').eval()
 
 
 # evaluate the cnn model
@@ -64,29 +65,36 @@ print(cnn_adv_xs_arr.shape)
 
 
 
-#define L2 distance
-def L2_distance(mu, log_sigma):
-    mu_distance = torch.mean(torch.sqrt(torch.sum(torch.pow(mu,2), 1)))
-    m = torch.full((log_sigma.size()), 1.0).cuda()
-    sigma_distance = torch.mean(torch.sqrt(torch.sum(torch.pow((torch.exp(log_sigma)-m),2), 1)))
-    return mu_distance, sigma_distance
+# define KL divergence function
+def KL_divergence(logvar, mu):
+    KLD = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp(),1)
+    return KLD
+
 
 # mu and sigma of normal examples
-_, mu, log_sigma = vae_model(test_x)
-print(log_sigma.size())
+_, mu, log_sigma,_ = vae_model(test_x)
 
-# meausre L2distance between N(0, I) and normal examples
-mu_dist, sigma_dist = L2_distance(mu, log_sigma)
-print('mu_dist: ',mu_dist, 'sigma_dist: ',sigma_dist)
+# meausre Dkl between N(0, I) and normal examples
+score_normal = KL_divergence(log_sigma, mu)
+print("score_normal: ", score_normal)
+plt.hist(score_normal.data.cpu().numpy(), bins=100)
+plt.show()
 
 # mu and sigma of adversarial examples
-_, mu_adv, log_sigma_adv = vae_model(torch.from_numpy(cnn_adv_xs_arr).cuda())
+_, mu_adv, log_sigma_adv, _ = vae_model(torch.from_numpy(cnn_adv_xs_arr).cuda())
+#sigma_adv = np.exp(log_sigma_adv)
 
+# meausre Dkl between N(0, I) and adv examples
+score_adv = KL_divergence(log_sigma_adv, mu_adv)
+print("score_adv: ", score_adv)
+plt.hist(score_adv.data.cpu().numpy(), bins=100)
+plt.show()
 
-# meausre L2distance between N(0, I) and normal examples
-adv_mu_dist, adv_sigma_dist = L2_distance(mu_adv, log_sigma_adv)
-print('adv_mu_dist: ',adv_mu_dist, 'adv_sigma_dist: ',adv_sigma_dist)
-
+print("-------------------------get average mu and sigma of normal examples-----------------------------")
+_, mu, log_sigma,_ = vae_model(test_x)
+average_mu = torch.mean(mu,0).type(torch.FloatTensor)
+average_log_sigma = torch.mean(log_sigma,0).type(torch.FloatTensor)
+print("average_mu", average_mu, "average_log_sigma", average_log_sigma)
 
 
 

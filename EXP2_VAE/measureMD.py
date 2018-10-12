@@ -6,18 +6,18 @@ import pickle
 import matplotlib.pyplot as plt
 
 # load data and model
-num_test = 30000
+num_test = 10
 test_data = torchvision.datasets.MNIST(
     root='/home/junhang/Projects/DataSet/MNIST',
-    train=True
+    train=False
 )
-test_x = torch.unsqueeze(test_data.train_data, dim=1).type(torch.FloatTensor)/255.
+test_x = torch.unsqueeze(test_data.test_data, dim=1).type(torch.FloatTensor)/255.
 test_x = test_x[:num_test].cuda()
-test_y = test_data.train_labels
+test_y = test_data.test_labels
 test_y = test_y[:num_test].cuda()
 
-vae_model = torch.load('/home/junhang/Projects/Scripts/saved_model/vae.pkl').eval()
-cnn_model = torch.load('/home/junhang/Projects/Scripts/saved_model/cnn.pkl').eval()
+vae_model = torch.load('/home/junhang/Projects/Scripts/saved_model/EXP2/vae.pkl').eval()
+cnn_model = torch.load('/home/junhang/Projects/Scripts/saved_model/EXP2/cnn.pkl').eval()
 
 
 # evaluate the cnn model
@@ -64,40 +64,34 @@ cnn_adv_ys_arr = np.array(cnn_adv_ys)
 print(cnn_adv_xs_arr.shape)
 
 
+def MD_torch(x, mu, log_sigma):
+    sigma = torch.diag(torch.exp(log_sigma))
+    d = x - mu
+    d = d.unsqueeze(1)
+    dsigma = torch.matmul(d, torch.inverse(sigma))
+    dT = torch.transpose(d, 1, 2)
+    dsigmadT = torch.matmul(dsigma, dT)
+    dist = torch.sqrt(dsigmadT)
+    return dist
 
-# define KL divergence function
-def KL_divergence(logvar, mu):
-    KLD = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp(),1)
-    return KLD
+# measure the distances of adv zs from normal distribution average mu and sigma
+mu_normal = torch.from_numpy(np.array([0.0258, -0.0733,  0.0023, -0.0938,  0.0200, -0.0434, -0.0560, -0.1042,
+        -0.0839,  0.0274, -0.0602, -0.0827, -0.0023, -0.0131, -0.0048, -0.0554,
+        -0.1199, -0.0337, -0.0227, -0.0301])).type(torch.FloatTensor).cuda()
+log_sigma_normal = torch.from_numpy(
+            np.array([-3.2315, -1.1976, -1.9496, -3.4011, -2.8279, -3.4072, -2.8475, -2.9930,
+        -2.2279, -2.5063, -3.0007, -3.0093, -2.1659, -1.7154, -1.5497, -2.5019,
+        -1.3952, -3.8016, -1.5189, -1.9021])).type(torch.FloatTensor).cuda()
 
 
-# mu and sigma of normal examples
-_, mu, log_sigma,_ = vae_model(test_x)
-
-# meausre Dkl between N(0, I) and normal examples
-score_normal = KL_divergence(log_sigma, mu)
-print("score_normal: ", score_normal)
-plt.hist(score_normal.data.cpu().numpy(), bins=100)
+_, mu, var, z = vae_model(test_x)
+dist = MD_torch(var, mu_normal, log_sigma_normal)
+dist = dist.squeeze(1).squeeze(1).data.cpu().numpy()
+plt.hist(dist, bins=50)
 plt.show()
 
-# mu and sigma of adversarial examples
-_, mu_adv, log_sigma_adv, _ = vae_model(torch.from_numpy(cnn_adv_xs_arr).cuda())
-#sigma_adv = np.exp(log_sigma_adv)
-
-# meausre Dkl between N(0, I) and adv examples
-score_adv = KL_divergence(log_sigma_adv, mu_adv)
-print("score_adv: ", score_adv)
-plt.hist(score_adv.data.cpu().numpy(), bins=100)
+_, mu_adv, var_adv, z_adv = vae_model(torch.from_numpy(cnn_adv_xs_arr).cuda())
+adv_dist = MD_torch(var_adv, mu_normal, log_sigma_normal)
+adv_dist = adv_dist.squeeze(1).squeeze(1).data.cpu().numpy()
+plt.hist(adv_dist, bins=50)
 plt.show()
-
-print("-------------------------get average mu and sigma of normal examples-----------------------------")
-_, mu, log_sigma,_ = vae_model(test_x)
-average_mu = torch.mean(mu,0).type(torch.FloatTensor)
-average_log_sigma = torch.mean(log_sigma,0).type(torch.FloatTensor)
-print("average_mu", average_mu, "average_log_sigma", average_log_sigma)
-
-
-
-
-
-

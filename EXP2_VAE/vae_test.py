@@ -61,4 +61,4 @@ for epoch in range(10):
     print('====> Epoch: {} Average loss: {:.4f}'.format(
           epoch, train_loss / len(train_loader.dataset)))
 
-torch.save(model, '/home/junhang/Projects/Scripts/saved_model/test_vae.pkl')
+torch.save(model, '/home/junhang/Projects/Scripts/saved_model/EXP2/test_vae.pkl')

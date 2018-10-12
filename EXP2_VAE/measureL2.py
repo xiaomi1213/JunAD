@@ -2,11 +2,10 @@ import torch
 import torchvision
 import foolbox
 import numpy as np
-import pickle
-import matplotlib.pyplot as plt
+
 
 # load data and model
-num_test = 10
+num_test = 10000
 test_data = torchvision.datasets.MNIST(
     root='/home/junhang/Projects/DataSet/MNIST',
     train=False
@@ -16,8 +15,8 @@ test_x = test_x[:num_test].cuda()
 test_y = test_data.test_labels
 test_y = test_y[:num_test].cuda()
 
-vae_model = torch.load('/home/junhang/Projects/Scripts/saved_model/vae.pkl').eval()
-cnn_model = torch.load('/home/junhang/Projects/Scripts/saved_model/cnn.pkl').eval()
+vae_model = torch.load('/home/junhang/Projects/Scripts/saved_model/EXP2/vae.pkl').eval()
+cnn_model = torch.load('/home/junhang/Projects/Scripts/saved_model/EXP2/cnn.pkl').eval()
 
 
 # evaluate the cnn model
@@ -64,34 +63,33 @@ cnn_adv_ys_arr = np.array(cnn_adv_ys)
 print(cnn_adv_xs_arr.shape)
 
 
-def MD_torch(x, mu, log_sigma):
-    sigma = torch.diag(torch.exp(log_sigma))
-    d = x - mu
-    d = d.unsqueeze(1)
-    dsigma = torch.matmul(d, torch.inverse(sigma))
-    dT = torch.transpose(d, 1, 2)
-    dsigmadT = torch.matmul(dsigma, dT)
-    dist = torch.sqrt(dsigmadT)
-    return dist
 
-# measure the distances of adv zs from normal distribution average mu and sigma
-mu_normal = torch.from_numpy(np.array([0.0258, -0.0733,  0.0023, -0.0938,  0.0200, -0.0434, -0.0560, -0.1042,
-        -0.0839,  0.0274, -0.0602, -0.0827, -0.0023, -0.0131, -0.0048, -0.0554,
-        -0.1199, -0.0337, -0.0227, -0.0301])).type(torch.FloatTensor).cuda()
-log_sigma_normal = torch.from_numpy(
-            np.array([-3.2315, -1.1976, -1.9496, -3.4011, -2.8279, -3.4072, -2.8475, -2.9930,
-        -2.2279, -2.5063, -3.0007, -3.0093, -2.1659, -1.7154, -1.5497, -2.5019,
-        -1.3952, -3.8016, -1.5189, -1.9021])).type(torch.FloatTensor).cuda()
+#define L2 distance
+def L2_distance(mu, log_sigma):
+    mu_distance = torch.mean(torch.sqrt(torch.sum(torch.pow(mu,2), 1)))
+    m = torch.full((log_sigma.size()), 1.0).cuda()
+    sigma_distance = torch.mean(torch.sqrt(torch.sum(torch.pow((torch.exp(log_sigma)-m),2), 1)))
+    return mu_distance, sigma_distance
+
+# mu and sigma of normal examples
+_, mu, log_sigma = vae_model(test_x)
+print(log_sigma.size())
+
+# meausre L2distance between N(0, I) and normal examples
+mu_dist, sigma_dist = L2_distance(mu, log_sigma)
+print('mu_dist: ',mu_dist, 'sigma_dist: ',sigma_dist)
+
+# mu and sigma of adversarial examples
+_, mu_adv, log_sigma_adv = vae_model(torch.from_numpy(cnn_adv_xs_arr).cuda())
 
 
-_, mu, var, z = vae_model(test_x)
-dist = MD_torch(var, mu_normal, log_sigma_normal)
-dist = dist.squeeze(1).squeeze(1).data.cpu().numpy()
-plt.hist(dist, bins=50)
-plt.show()
+# meausre L2distance between N(0, I) and normal examples
+adv_mu_dist, adv_sigma_dist = L2_distance(mu_adv, log_sigma_adv)
+print('adv_mu_dist: ',adv_mu_dist, 'adv_sigma_dist: ',adv_sigma_dist)
 
-_, mu_adv, var_adv, z_adv = vae_model(torch.from_numpy(cnn_adv_xs_arr).cuda())
-adv_dist = MD_torch(var_adv, mu_normal, log_sigma_normal)
-adv_dist = adv_dist.squeeze(1).squeeze(1).data.cpu().numpy()
-plt.hist(adv_dist, bins=50)
-plt.show()
+
+
+
+
+
+

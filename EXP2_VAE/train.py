@@ -220,8 +220,8 @@ if __name__ == "__main__":
     import torch.utils.data as Data
     import torchvision
 
-    from EXP1_VAE.depict_vae import DPVAE
-
+    from EXP2_VAE.vae_model import VAE
+    from EXP2_VAE.ae_model import AutoEncoder
     train_data = torchvision.datasets.MNIST(
         root='/home/junhang/Projects/DataSet/MNIST',
         train=True,
@@ -233,11 +233,7 @@ if __name__ == "__main__":
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     """
-    print("--------------------AE training--------------------------------")
-    ae = AutoEncoder()
-    ae = ae.to(device)
-    train_ae(ae, train_loader, device, num_epoch=10, lr=1e-3)
-    torch.save(ae, '/home/junhang/Projects/Scripts/saved_model/ae.pkl')
+    
 
     
 
@@ -245,38 +241,43 @@ if __name__ == "__main__":
     cnn = CNN()
     cnn = cnn.to(device)
     train_cnn(cnn, train_loader, device, num_epoch=2)
-    torch.save(cnn, '/home/junhang/Projects/Scripts/saved_model/cnn.pkl')
+    torch.save(cnn, '/home/junhang/Projects/Scripts/saved_model/EXP2/cnn.pkl')
     
     
     print("--------------------REVERSE L2 VAE training--------------------------------")
     rev_l2_vae = REVERSE_L2_VAE(tao=2.0)
     rev_l2_vae = rev_l2_vae.to(device)
     train_reverse_l2_vae(rev_l2_vae, train_loader, device, num_epoch=10)
-    torch.save(rev_l2_vae, '/home/junhang/Projects/Scripts/saved_model/rev_l2_vae.pkl')
+    torch.save(rev_l2_vae, '/home/junhang/Projects/Scripts/saved_model/EXP2/rev_l2_vae.pkl')
     
     print("--------------------REVERSE VAE training--------------------------------")
     rev_vae = REVERSE_VAE(tao=2.0)
     rev_vae = rev_vae.to(device)
     train_reverse_vae(rev_vae, train_loader, device, num_epoch=10)
-    torch.save(rev_vae, '/home/junhang/Projects/Scripts/saved_model/rev_vae.pkl')
+    torch.save(rev_vae, '/home/junhang/Projects/Scripts/saved_model/EXP2/rev_vae.pkl')
     
     
     print("--------------------REG VAE training--------------------------------")
     reg_vae = REG_VAE(tao=2.0,)
     reg_vae = reg_vae.to(device)
     train_reg_vae(reg_vae, train_loader, device, num_epoch=10)
-    torch.save(reg_vae, '/home/junhang/Projects/Scripts/saved_model/reg_vae.pkl')
+    torch.save(reg_vae, '/home/junhang/Projects/Scripts/saved_model/EXP2/reg_vae.pkl')
+    
+    print("--------------------DPVAE training--------------------------------")
+    depict_vae = DPVAE()
+    depict_vae = depict_vae.to(device)
+    train_vae(depict_vae, train_loader, device, num_epoch=10)
+    torch.save(depict_vae, '/home/junhang/Projects/Scripts/saved_model/EXP2/vae_depict_model.pkl')
     
     print("--------------------VAE training--------------------------------")
     vae = VAE()
     vae = vae.to(device)
     train_vae(vae, train_loader, device, num_epoch=10)
-    torch.save(vae, '/home/junhang/Projects/Scripts/saved_model/vae.pkl')
+    torch.save(vae, '/home/junhang/Projects/Scripts/saved_model/EXP2/vae.pkl')
     """
 
-
-    print("--------------------DPVAE training--------------------------------")
-    depict_vae = DPVAE()
-    depict_vae = depict_vae.to(device)
-    train_vae(depict_vae, train_loader, device, num_epoch=10)
-    torch.save(depict_vae, '/home/junhang/Projects/Scripts/saved_model/vae_depict_model.pkl')
+    print("--------------------AE training--------------------------------")
+    ae = AutoEncoder()
+    ae = ae.to(device)
+    train_ae(ae, train_loader, device, num_epoch=10, lr=1e-3)
+    torch.save(ae, '/home/junhang/Projects/Scripts/saved_model/EXP2/ae.pkl')

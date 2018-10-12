@@ -34,11 +34,11 @@ training_y = training_data.training_labels
 training_y = training_y[:num_training].cuda()
 """
 
-cnn_model = torch.load('/home/junhang/Projects/Scripts/saved_model/cnn.pkl').eval()
-vae_model = torch.load('/home/junhang/Projects/Scripts/saved_model/vae.pkl').eval()
-rev_vae_model = torch.load('/home/junhang/Projects/Scripts/saved_model/rev_vae.pkl').eval()
-rev_l2_vae_model = torch.load('/home/junhang/Projects/Scripts/saved_model/rev_l2_vae.pkl').eval()
-reg_vae_model = torch.load('/home/junhang/Projects/Scripts/saved_model/reg_vae.pkl').eval()
+cnn_model = torch.load('/home/junhang/Projects/Scripts/saved_model/EXP2/cnn.pkl').eval()
+vae_model = torch.load('/home/junhang/Projects/Scripts/saved_model/EXP2/vae.pkl').eval()
+rev_vae_model = torch.load('/home/junhang/Projects/Scripts/saved_model/EXP2/rev_vae.pkl').eval()
+rev_l2_vae_model = torch.load('/home/junhang/Projects/Scripts/saved_model/EXP2/rev_l2_vae.pkl').eval()
+reg_vae_model = torch.load('/home/junhang/Projects/Scripts/saved_model/EXP2/reg_vae.pkl').eval()
 
 # evaluate the cnn model
 print("-------------------------evaluating cnn model-----------------------------")
