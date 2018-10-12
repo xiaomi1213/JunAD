@@ -6,25 +6,31 @@ class AutoEncoder(nn.Module):
     def __init__(self):
         super(AutoEncoder, self).__init__()
 
-        self.encoder = nn.Sequential(
-            nn.Linear(28*28, 128),
-            nn.Tanh(),
-            nn.Linear(128, 64),
-            nn.Tanh(),
-            nn.Linear(64, 12),
-            nn.Tanh(),
-            nn.Linear(12, 3),   # compress to 3 features which can be visualized in plt
-        )
-        self.decoder = nn.Sequential(
-            nn.Linear(3, 12),
-            nn.Tanh(),
-            nn.Linear(12, 64),
-            nn.Tanh(),
-            nn.Linear(64, 128),
-            nn.Tanh(),
-            nn.Linear(128, 28*28),
-            nn.Sigmoid(),       # compress to a range (0, 1)
-        )
+        self.conv1 = nn.Conv2d(1, 32, kernel_size=4, stride=2, padding=1)
+        self.conv2 = nn.Conv2d(32, 32, kernel_size=4, stride=2, padding=1)
+        self.conv3 = nn.Conv2d(32, 64, kernel_size=3, stride=2, padding=1)
+        self.fc1 = nn.Linear(64 * 4 * 4, 256)
+        self.fc2 = nn.Linear(256, 64 * 4 * 4)
+        self.deconv1 = nn.ConvTranspose2d(64, 32, kernel_size=3, stride=2, padding=1)
+        self.deconv2 = nn.ConvTranspose2d(32, 32, kernel_size=4, stride=2, padding=1)
+        self.deconv3 = nn.ConvTranspose2d(32, 1, kernel_size=4, stride=2, padding=1)
+
+        self.relu = nn.ReLU()
+        self.sigmoid = nn.Sigmoid()
+
+    def encode(self, x):
+        x = self.relu(self.conv1(x))
+        x = self.relu(self.conv2(x))
+        x = self.relu(self.conv3(x))
+        return self.relu(self.fc1(x.view(-1, 64 * 4 * 4)))
+
+    def decode(self, z):
+        x = self.relu(self.fc2(z))
+        x = self.relu(self.fc3(x))
+        x = self.relu(self.deconv1(x.view(-1, 64, 4, 4)))
+        x = self.relu(self.deconv2(x))
+        return self.sigmoid(self.deconv3(x))
+
 
     def forward(self, x):
         encoded = self.encoder(x)
