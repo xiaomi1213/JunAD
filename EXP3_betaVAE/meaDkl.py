@@ -5,7 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # load data and model
-num_test = 10
+num_test = 100
 test_data = torchvision.datasets.MNIST(
     root='/home/junhang/Projects/DataSet/MNIST',
     train=True
@@ -70,10 +70,6 @@ print(cnn_adv_xs_arr.shape)
 def KL_divergence(logvar, mu):
     KLD = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp(),1)
     return KLD
-
-
-# vanilla vae model
-# mu and sigma of normal examples
 _, mu, log_sigma = vae_model(test_x)
 # meausre Dkl between N(0, I) and normal examples
 score_normal_1 = KL_divergence(log_sigma, mu)
@@ -86,6 +82,10 @@ plt.hist(score_adv_1.data.cpu().numpy(), bins=100, alpha=0.5, label='adv_1')
 plt.legend(loc='upper right')
 plt.title('VAE')
 plt.show()
+
+# vanilla vae model
+# mu and sigma of normal examples
+
 
 
 """

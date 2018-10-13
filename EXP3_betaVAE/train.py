@@ -56,7 +56,7 @@ def train_vae(model, train_loader, device, num_epoch=2, lr=1e-3):
         # 0.5 * sum(1 + log(sigma^2) - mu^2 - sigma^2)
         KLD = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())
 
-        return BCE + 4*KLD
+        return BCE + KLD
 
     train_loss = 0
 
@@ -74,8 +74,6 @@ def train_vae(model, train_loader, device, num_epoch=2, lr=1e-3):
                     epoch, batch_idx * len(data), len(train_loader.dataset),
                            100. * batch_idx / len(train_loader),
                            loss.item() / len(data)))
-
-
 def train_beta_vae_h(model, train_loader, device, num_epoch=2, lr=1e-3):
     model.train()
     optimizer = optim.Adam(model.parameters(), lr=lr)
@@ -192,19 +190,21 @@ if __name__ == "__main__":
     train_beta_vae_b(beta_vae_b, train_loader, device, C_max=25, C_stop_iter=10, gamma=1000, num_epoch=10)
     torch.save(beta_vae_b, '/home/junhang/Projects/Scripts/saved_model/EXP3/beta_vae_b.pkl')
     
-    print("--------------------BETA_VAE_H training--------------------------------")
-    beta_vae_h = BetaVAE()
-    beta_vae_h = beta_vae_h.to(device)
-    train_beta_vae_h(beta_vae_h, train_loader, device, num_epoch=3)
-    torch.save(beta_vae_h, '/home/junhang/Projects/Scripts/saved_model/EXP3/beta_vae_h.pkl')
+    
     
     """
-
     print("--------------------VAE training--------------------------------")
     vae = VAE()
     vae = vae.to(device)
     train_vae(vae, train_loader, device, num_epoch=10)
     torch.save(vae, '/home/junhang/Projects/Scripts/saved_model/EXP3/vae.pkl')
+
+    print("--------------------BETA_VAE_H training--------------------------------")
+    beta_vae_h = BetaVAE()
+    beta_vae_h = beta_vae_h.to(device)
+    train_beta_vae_h(beta_vae_h, train_loader, device, num_epoch=10)
+    torch.save(beta_vae_h, '/home/junhang/Projects/Scripts/saved_model/EXP3/beta_vae_h.pkl')
+
 
 
 
