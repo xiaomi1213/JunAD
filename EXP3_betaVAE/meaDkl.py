@@ -5,7 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # load data and model
-num_test = 100
+num_test = 10
 test_data = torchvision.datasets.MNIST(
     root='/home/junhang/Projects/DataSet/MNIST',
     train=True
@@ -17,8 +17,8 @@ test_y = test_y[:num_test].cuda()
 
 cnn_model = torch.load('/home/junhang/Projects/Scripts/saved_model/EXP3/cnn.pkl').eval()
 vae_model = torch.load('/home/junhang/Projects/Scripts/saved_model/EXP3/vae.pkl').eval()
-beta_vae_b = torch.load('/home/junhang/Projects/Scripts/saved_model/EXP3/beta_vae_b.pkl').eval()
-beta_vae_h = torch.load('/home/junhang/Projects/Scripts/saved_model/EXP3/beta_vae_h.pkl').eval()
+#beta_vae_b = torch.load('/home/junhang/Projects/Scripts/saved_model/EXP3/beta_vae_b.pkl').eval()
+#beta_vae_h = torch.load('/home/junhang/Projects/Scripts/saved_model/EXP3/beta_vae_h.pkl').eval()
 
 
 # evaluate the cnn model
@@ -183,6 +183,10 @@ plt.show()
 
 """
 
+
+
+"""
+
 # beta vae h model 10
 # mu and sigma of normal examples
 _, mu, log_sigma = beta_vae_h(test_x)
@@ -198,7 +202,7 @@ plt.legend(loc='upper right')
 plt.title('beta-VAE-H')
 plt.show()
 
-"""
+
 # beta vae b model
 # mu and sigma of normal examples
 _, mu, log_sigma = beta_vae_b(test_x)
