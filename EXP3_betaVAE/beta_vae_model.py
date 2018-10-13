@@ -6,9 +6,9 @@ from torch import nn
 class BetaVAE(nn.Module):
     def __init__(self, nb_latents=10):
         super(BetaVAE, self).__init__()
-        self.conv1 = nn.Conv2d(1, 32, kernel_size=4, stride=2, padding=1)
-        self.conv2 = nn.Conv2d(32, 32, kernel_size=4, stride=2, padding=1)
-        self.conv3 = nn.Conv2d(32, 64, kernel_size=3, stride=2, padding=1)
+        self.conv1 = nn.Conv2d(1, 32, kernel_size=4, stride=2, padding=1) #batch * 32 * 14 * 14
+        self.conv2 = nn.Conv2d(32, 32, kernel_size=4, stride=2, padding=1) #batch * 32 * 6 * 6
+        self.conv3 = nn.Conv2d(32, 64, kernel_size=3, stride=2, padding=1) #batch * 64 * 4 * 4
         self.fc1 = nn.Linear(64 * 4 * 4, 256)
 
         self.fc_mean = nn.Linear(256, nb_latents)

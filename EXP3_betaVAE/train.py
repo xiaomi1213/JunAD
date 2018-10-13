@@ -32,7 +32,7 @@ def train_ae(model, train_loader, device, num_epoch=2, lr=1e-3):
         train_loss = 0
         for step, (batch_x, batch_y) in enumerate(train_loader):
             batch_x = batch_x.to(device)
-            batch_x = batch_x.view(-1, 784)
+            #batch_x = batch_x.view(-1, 784)
             optimizer.zero_grad()
             _,preds = model(batch_x)
             loss = loss_func(preds, batch_x)
@@ -64,7 +64,7 @@ def train_vae(model, train_loader, device, num_epoch=2, lr=1e-3):
         for batch_idx, (data, _) in enumerate(train_loader):
             data = data.to(device)
             optimizer.zero_grad()
-            recon_batch, mu, logvar,_ = model(data)
+            recon_batch, mu, logvar = model(data)
             loss = loss_function(recon_batch, data, mu, logvar)
             loss.backward()
             train_loss += loss.item()
@@ -155,7 +155,11 @@ if __name__ == "__main__":
     import torch
     import torch.utils.data as Data
     import torchvision
+    from EXP3_betaVAE.base_cnn import CNN
+    from EXP3_betaVAE.ae_model import AutoEncoder
+    from EXP3_betaVAE.vae_model import VAE
     from EXP3_betaVAE.beta_vae_model import BetaVAE
+
 
     train_data = torchvision.datasets.MNIST(
         root='/home/junhang/Projects/DataSet/MNIST',
@@ -168,12 +172,24 @@ if __name__ == "__main__":
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
     """
+    print("--------------------CNN training--------------------------------")
+    cnn = CNN()
+    cnn = cnn.to(device)
+    train_cnn(cnn, train_loader, device, num_epoch=2)
+    torch.save(cnn, '/home/junhang/Projects/Scripts/saved_model/EXP3/cnn.pkl')
+
+    print("--------------------AE training--------------------------------")
+    ae = AutoEncoder()
+    ae = ae.to(device)
+    train_ae(ae, train_loader, device, num_epoch=10, lr=1e-3)
+    torch.save(ae, '/home/junhang/Projects/Scripts/saved_model/EXP3/ae.pkl')
+
+    print("--------------------VAE training--------------------------------")
+    vae = VAE()
+    vae = vae.to(device)
+    train_vae(vae, train_loader, device, num_epoch=10)
+    torch.save(vae, '/home/junhang/Projects/Scripts/saved_model/EXP3/vae.pkl')
     
-    print("--------------------BETA_VAE_H training--------------------------------")
-    beta_vae_h = BetaVAE()
-    beta_vae_h = beta_vae_h.to(device)
-    train_beta_vae_h(beta_vae_h, train_loader, device, num_epoch=10)
-    torch.save(beta_vae_h, '/home/junhang/Projects/Scripts/saved_model/EXP3/beta_vae_h.pkl')
     
     print("--------------------BETA_VAE_B training--------------------------------")
     beta_vae_b = BetaVAE()
@@ -181,6 +197,15 @@ if __name__ == "__main__":
     train_beta_vae_b(beta_vae_b, train_loader, device, C_max=25, C_stop_iter=10, gamma=1000, num_epoch=10)
     torch.save(beta_vae_b, '/home/junhang/Projects/Scripts/saved_model/EXP3/beta_vae_b.pkl')
     """
+
+    print("--------------------BETA_VAE_H training--------------------------------")
+    beta_vae_h = BetaVAE()
+    beta_vae_h = beta_vae_h.to(device)
+    train_beta_vae_h(beta_vae_h, train_loader, device, num_epoch=3)
+    torch.save(beta_vae_h, '/home/junhang/Projects/Scripts/saved_model/EXP3/beta_vae_h.pkl')
+    
+
+
 
 
 

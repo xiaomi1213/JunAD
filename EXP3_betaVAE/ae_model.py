@@ -18,15 +18,14 @@ class AutoEncoder(nn.Module):
         self.relu = nn.ReLU()
         self.sigmoid = nn.Sigmoid()
 
-    def encode(self, x):
+    def encoder(self, x):
         x = self.relu(self.conv1(x))
         x = self.relu(self.conv2(x))
         x = self.relu(self.conv3(x))
         return self.relu(self.fc1(x.view(-1, 64 * 4 * 4)))
 
-    def decode(self, z):
+    def decoder(self, z):
         x = self.relu(self.fc2(z))
-        x = self.relu(self.fc3(x))
         x = self.relu(self.deconv1(x.view(-1, 64, 4, 4)))
         x = self.relu(self.deconv2(x))
         return self.sigmoid(self.deconv3(x))
