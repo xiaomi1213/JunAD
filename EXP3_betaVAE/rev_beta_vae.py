@@ -44,19 +44,20 @@ class REV_BETA_VAE(nn.Module):
         return vol / len(mu_adv)
         """
         KLD = -0.5 * torch.sum(1 + log_sigma_adv - mu_adv.pow(2) - log_sigma_adv.exp())
+        #vol = torch.mean(KLD)
         return KLD
 
     def reversing(self, mu, log_sigma):
-        lr = 0.1
+        lr = 1e-2
         update_mu = mu.clone()
         update_log_sigma = log_sigma.clone()
-        for i in range(100):
+        for i in range(10):
             reversing_vol = self.rev_vol(update_mu, update_log_sigma)
             mu_grad, sigma_grad = torch.autograd.grad(reversing_vol, [update_mu, update_log_sigma], \
                                                       allow_unused=True, retain_graph=True)
             update_mu += lr * mu_grad
             update_log_sigma += lr * sigma_grad
-            print("reversing_vol: ", reversing_vol)
+        print("reversing_vol: ", reversing_vol)
 
         std = torch.exp(0.5 * update_log_sigma)
         eps = torch.randn_like(std)
@@ -87,6 +88,6 @@ class REV_BETA_VAE(nn.Module):
         return self.sigmoid(self.deconv3(x))
 
     def forward(self, x):
-        mu, logvar = self.encode(x)
+        mu, logvar = self.encoder(x)
         z = self.reparameterize(mu, logvar)
-        return self.decode(z), mu, logvar
+        return self.decoder(z), mu, logvar

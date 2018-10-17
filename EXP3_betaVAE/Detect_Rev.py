@@ -4,19 +4,19 @@ import foolbox
 import numpy as np
 
 # load data and model
-num_test = 100
+num_test = 2
 test_data = torchvision.datasets.MNIST(
     root='/home/junhang/Projects/DataSet/MNIST',
     train=False
 )
 test_x = torch.unsqueeze(test_data.test_data, dim=1).type(torch.FloatTensor)/255.
-test_x = test_x[:num_test].cuda()
+test_x = test_x[num_test].unsqueeze(0).cuda()
 test_y = test_data.test_labels
-test_y = test_y[:num_test].cuda()
+test_y = test_y[num_test].unsqueeze(0).cuda()
 
 
 cnn_model = torch.load('/home/junhang/Projects/Scripts/saved_model/EXP3/cnn.pkl').eval()
-vae_model = torch.load('/home/junhang/Projects/Scripts/saved_model/EXP3/vae.pkl').eval()
+beta_vae_h = torch.load('/home/junhang/Projects/Scripts/saved_model/EXP3/beta_vae_h.pkl').eval()
 rev_beta_vae = torch.load('/home/junhang/Projects/Scripts/saved_model/EXP3/rev_beta_vae.pkl').eval()
 
 
@@ -72,13 +72,12 @@ cnn_adv_accuracy = float((cnn_pred_adv_y == cnn_adv_ys_arr).astype(int).sum())/f
 print('CNN_adv accuracy: %.4f' % cnn_adv_accuracy)
 
 
-print("-------------------------evaluate vae+cnn with adv-----------------------------")
-vae_x,_,_ = vae_model(torch.from_numpy(cnn_adv_xs_arr).cuda())
-test_output = cnn_model(vae_x)
-vae_cnn_pred_adv_y = torch.max(test_output, 1)[1].data.squeeze().cpu().numpy()
-vae_cnn_adv_accuracy = float((vae_cnn_pred_adv_y == cnn_adv_ys_arr).astype(int).sum())/float(cnn_adv_ys_arr.shape[0])
-print('VAE+CNN_adv accuracy: %.4f' % vae_cnn_adv_accuracy)
-
+print("-------------------------evaluate beta_vae_h+cnn with normal-----------------------------")
+beta_vae_h_x,_,_ = beta_vae_h(torch.from_numpy(cnn_adv_xs_arr).cuda())
+test_output = cnn_model(beta_vae_h_x)
+beta_vae_h_cnn_pred_adv_y = torch.max(test_output, 1)[1].data.squeeze().cpu().numpy()
+beta_vae_h_cnn_accuracy = float((beta_vae_h_cnn_pred_adv_y == cnn_adv_ys_arr).astype(int).sum())/float(test_y.shape[0])
+print('BETA_VAE_H+CNN_adv accuracy: %.4f' % beta_vae_h_cnn_accuracy)
 
 print("-------------------------evaluate rev_beta_vae+cnn with adv-----------------------------")
 rev_beta_vae_x,_,_ = rev_beta_vae(torch.from_numpy(cnn_adv_xs_arr).cuda())

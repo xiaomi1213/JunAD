@@ -17,9 +17,10 @@ test_y = test_y[:num_test].cuda()
 
 cnn_model = torch.load('/home/junhang/Projects/Scripts/saved_model/EXP3/cnn.pkl').eval()
 vae_model = torch.load('/home/junhang/Projects/Scripts/saved_model/EXP3/vae.pkl').eval()
-#beta_vae_b = torch.load('/home/junhang/Projects/Scripts/saved_model/EXP3/beta_vae_b.pkl').eval()
-#beta_vae_h = torch.load('/home/junhang/Projects/Scripts/saved_model/EXP3/beta_vae_h.pkl').eval()
-
+beta_vae_b = torch.load('/home/junhang/Projects/Scripts/saved_model/EXP3/beta_vae_b.pkl').eval()
+beta_vae_h = torch.load('/home/junhang/Projects/Scripts/saved_model/EXP3/beta_vae_h.pkl').eval()
+rev_beta_vae = torch.load('/home/junhang/Projects/Scripts/saved_model/EXP3/rev_beta_vae.pkl').eval()
+limit_vae = torch.load('/home/junhang/Projects/Scripts/saved_model/EXP3/limit_vae.pkl').eval()
 
 # evaluate the cnn model
 print("-------------------------evaluating cnn model-----------------------------")
@@ -70,6 +71,10 @@ print(cnn_adv_xs_arr.shape)
 def KL_divergence(logvar, mu):
     KLD = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp(),1)
     return KLD
+
+
+# vanilla vae model
+# mu and sigma of normal examples
 _, mu, log_sigma = vae_model(test_x)
 # meausre Dkl between N(0, I) and normal examples
 score_normal_1 = KL_divergence(log_sigma, mu)
@@ -83,111 +88,7 @@ plt.legend(loc='upper right')
 plt.title('VAE')
 plt.show()
 
-# vanilla vae model
-# mu and sigma of normal examples
-
-
-
-"""
-# beta vae h model 0.001
-# mu and sigma of normal examples
-_, mu, log_sigma = beta_vae_h_1(test_x)
-# meausre Dkl between N(0, I) and normal examples
-score_normal_1 = KL_divergence(log_sigma, mu)
-# mu and sigma of adversarial examples
-_, mu_adv, log_sigma_adv = beta_vae_h_1(torch.from_numpy(cnn_adv_xs_arr).cuda())
-# meausre Dkl between N(0, I) and adv examples
-score_adv_1 = KL_divergence(log_sigma_adv, mu_adv)
-plt.hist(score_normal_1.data.cpu().numpy(), bins=100, alpha=0.5, label='normal_1')
-plt.hist(score_adv_1.data.cpu().numpy(), bins=100, alpha=0.5, label='adv_1')
-plt.legend(loc='upper right')
-plt.title('beta-VAE-h-0.001')
-plt.show()
-
-# beta vae h model 0.01
-# mu and sigma of normal examples
-_, mu, log_sigma = beta_vae_h_2(test_x)
-# meausre Dkl between N(0, I) and normal examples
-score_normal_2 = KL_divergence(log_sigma, mu)
-# mu and sigma of adversarial examples
-_, mu_adv, log_sigma_adv = beta_vae_h_2(torch.from_numpy(cnn_adv_xs_arr).cuda())
-# meausre Dkl between N(0, I) and adv examples
-score_adv_2 = KL_divergence(log_sigma_adv, mu_adv)
-plt.hist(score_normal_2.data.cpu().numpy(), bins=100, alpha=0.5, label='normal_2')
-plt.hist(score_adv_2.data.cpu().numpy(), bins=100, alpha=0.5, label='adv_2')
-plt.legend(loc='upper right')
-plt.title('beta-VAE-h-0.01')
-plt.show()
-
-# beta vae h model 0.1
-# mu and sigma of normal examples
-_, mu, log_sigma = beta_vae_h_3(test_x)
-# meausre Dkl between N(0, I) and normal examples
-score_normal_3 = KL_divergence(log_sigma, mu)
-# mu and sigma of adversarial examples
-_, mu_adv, log_sigma_adv = beta_vae_h_3(torch.from_numpy(cnn_adv_xs_arr).cuda())
-# meausre Dkl between N(0, I) and adv examples
-score_adv_3 = KL_divergence(log_sigma_adv, mu_adv)
-plt.hist(score_normal_3.data.cpu().numpy(), bins=100, alpha=0.5, label='normal_3')
-plt.hist(score_adv_3.data.cpu().numpy(), bins=100, alpha=0.5, label='adv_3')
-plt.legend(loc='upper right')
-plt.title('beta-VAE-h-0.1')
-plt.show()
-
-# beta vae h model 1
-# mu and sigma of normal examples
-_, mu, log_sigma = beta_vae_h_4(test_x)
-# meausre Dkl between N(0, I) and normal examples
-score_normal_4 = KL_divergence(log_sigma, mu)
-# mu and sigma of adversarial examples
-_, mu_adv, log_sigma_adv = beta_vae_h_4(torch.from_numpy(cnn_adv_xs_arr).cuda())
-# meausre Dkl between N(0, I) and adv examples
-score_adv_4 = KL_divergence(log_sigma_adv, mu_adv)
-plt.hist(score_normal_4.data.cpu().numpy(), bins=100, alpha=0.5, label='normal_4')
-plt.hist(score_adv_4.data.cpu().numpy(), bins=100, alpha=0.5, label='adv_4')
-plt.legend(loc='upper right')
-plt.title('beta-VAE-h-1')
-plt.show()
-
-# beta vae h model 100
-# mu and sigma of normal examples
-_, mu, log_sigma = beta_vae_h_6(test_x)
-# meausre Dkl between N(0, I) and normal examples
-score_normal_6 = KL_divergence(log_sigma, mu)
-# mu and sigma of adversarial examples
-_, mu_adv, log_sigma_adv = beta_vae_h_6(torch.from_numpy(cnn_adv_xs_arr).cuda())
-# meausre Dkl between N(0, I) and adv examples
-score_adv_6 = KL_divergence(log_sigma_adv, mu_adv)
-plt.hist(score_normal_6.data.cpu().numpy(), bins=100, alpha=0.5, label='normal_6')
-plt.hist(score_adv_6.data.cpu().numpy(), bins=100, alpha=0.5, label='adv_6')
-plt.legend(loc='upper right')
-plt.title('beta-VAE-h-100')
-plt.show()
-
-# beta vae h model 1000
-# mu and sigma of normal examples
-_, mu, log_sigma = beta_vae_h_7(test_x)
-# meausre Dkl between N(0, I) and normal examples
-score_normal_7 = KL_divergence(log_sigma, mu)
-# mu and sigma of adversarial examples
-_, mu_adv, log_sigma_adv = beta_vae_h_7(torch.from_numpy(cnn_adv_xs_arr).cuda())
-# meausre Dkl between N(0, I) and adv examples
-score_adv_7 = KL_divergence(log_sigma_adv, mu_adv)
-plt.hist(score_normal_7.data.cpu().numpy(), bins=100, alpha=0.5, label='normal_7')
-plt.hist(score_adv_7.data.cpu().numpy(), bins=100, alpha=0.5, label='adv_7')
-plt.legend(loc='upper right')
-plt.title('beta-VAE-h-1000')
-plt.show()
-
-
-
-"""
-
-
-
-"""
-
-# beta vae h model 10
+# beta vae h model
 # mu and sigma of normal examples
 _, mu, log_sigma = beta_vae_h(test_x)
 # meausre Dkl between N(0, I) and normal examples
@@ -201,6 +102,23 @@ plt.hist(score_adv_5.data.cpu().numpy(), bins=100, alpha=0.5, label='adv_5')
 plt.legend(loc='upper right')
 plt.title('beta-VAE-H')
 plt.show()
+
+
+# rev beta vae  model 0.01
+# mu and sigma of normal examples
+_, mu, log_sigma = rev_beta_vae(test_x)
+# meausre Dkl between N(0, I) and normal examples
+score_normal_rev = KL_divergence(log_sigma, mu)
+# mu and sigma of adversarial examples
+_, mu_adv, log_sigma_adv = rev_beta_vae(torch.from_numpy(cnn_adv_xs_arr).cuda())
+# meausre Dkl between N(0, I) and adv examples
+score_adv_rev = KL_divergence(log_sigma_adv, mu_adv)
+plt.hist(score_normal_rev.data.cpu().numpy(), bins=100, alpha=0.5, label='normal_rev')
+plt.hist(score_adv_rev.data.cpu().numpy(), bins=100, alpha=0.5, label='adv_rev')
+plt.legend(loc='upper right')
+plt.title('rev_beta-VAE')
+plt.show()
+
 
 
 # beta vae b model
@@ -217,4 +135,22 @@ plt.hist(score_adv.data.cpu().numpy(), bins=100, alpha=0.5, label='adv')
 plt.legend(loc='upper right')
 plt.title('beta-VAE-B')
 plt.show()
-"""
+
+
+# limit vae model
+# mu and sigma of normal examples
+_, mu, log_sigma = limit_vae(test_x)
+# meausre Dkl between N(0, I) and normal examples
+score_normal = KL_divergence(log_sigma, mu)
+# mu and sigma of adversarial examples
+_, mu_adv, log_sigma_adv = limit_vae(torch.from_numpy(cnn_adv_xs_arr).cuda())
+# meausre Dkl between N(0, I) and adv examples
+score_adv = KL_divergence(log_sigma_adv, mu_adv)
+plt.hist(score_normal.data.cpu().numpy(), bins=100, alpha=0.5, label='normal')
+plt.hist(score_adv.data.cpu().numpy(), bins=100, alpha=0.5, label='adv')
+plt.legend(loc='upper right')
+plt.title('limit_vae')
+plt.show()
+
+
+

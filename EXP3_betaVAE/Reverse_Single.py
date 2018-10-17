@@ -9,7 +9,7 @@ beta_vae_h = torch.load('/home/junhang/Projects/Scripts/saved_model/EXP3/beta_va
 rev_beta_vae = torch.load('/home/junhang/Projects/Scripts/saved_model/EXP3/rev_beta_vae.pkl').eval()
 
 #2 load data
-num_test = 100
+num_test = 1
 test_data = torchvision.datasets.MNIST(
     root='/home/junhang/Projects/DataSet/MNIST',
     train=False)
@@ -24,8 +24,9 @@ reduced_num_test = list(range(num_test))
 print("-------------------------Looping-----------------------------")
 for i in range(num_test):
     #3 select a image randomly and not redunperly
-    choice_num = np.random.choose(reduced_num_test, 1)
-    del reduced_num_test[choice_num]
+
+    choice_num = np.random.choice(reduced_num_test, 1).squeeze()
+    reduced_num_test.remove(choice_num)
     single_x = test_x[choice_num].unsqueeze(0)
     single_y = test_y[choice_num].unsqueeze(0)
 
@@ -43,15 +44,16 @@ for i in range(num_test):
             cnn_model, bounds=(0, 1), num_classes=10, preprocessing=(0, 1))
         attack = foolbox.attacks.FGSM(fmodel)
 
-        single_x_cpu = single_x.cpu().data.numpy()
-        single_y_cpu = single_y
+        single_x_cpu = single_x.cpu().numpy().squeeze(0)
+        single_y_cpu = single_y.cpu().numpy().squeeze(0)
+
         single_adv_x = attack(single_x_cpu, single_y_cpu)# generating an adversarial example
         if single_adv_x is None:
             continue
         generate_count += 1
 
     #6 reverse the adversarial example with VAE
-    rev_beta_vae_x, _, _ = rev_beta_vae(torch.from_numpy(single_adv_x).cuda())
+    rev_beta_vae_x, _, _ = rev_beta_vae(torch.from_numpy(single_adv_x).unsqueeze(0).cuda())
 
     #7 classify the reversed image and verify the result
     test_output = cnn_model(rev_beta_vae_x)
@@ -64,6 +66,7 @@ for i in range(num_test):
 
 #8 calculate the accuracy
 accuracy = correct_count / float(generate_count)
+print('have generated adversarial examples: %d' % generate_count)
 print('reverse_beta_vae+CNN_adv accuracy: %.4f' % accuracy)
 
 
